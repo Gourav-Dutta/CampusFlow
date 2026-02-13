@@ -14,35 +14,244 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum userRole {
+
+enum UserRole {
   Teacher
-  Principle
+  Principal
   Student
-  Clerk 
+  Clerk
   Peon
-  Admin
 }
 
-enum schoolType {
+enum SchoolType {
   Secondary
   Higher_Secondary
 }
 
-
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String   @unique
-  phone_no  String
-  password  String
-  role      userRole
-  // school_id String   @db.ObjectId
-  year      String
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  phone_no    String
+  password    String
+  role        UserRole
+  year        Int
 
-  // school    School   @relation(fields: [school_id], references: [id])
+  addresses       UserAddress[]
+  documents       UserDocument[]
+  schools         UserSchool[]
+  parentLinks     ParentStudent[] @relation("StudentParent")
 
-  // addresses User_Address[]
-  // parents   Parent_Student[] @relation("StudentParents")
-  // marks     Marks[]
-  // attendance Attendance[]
+  attendanceTaken Attendance[] @relation("TeacherAttendance")
+  attendance      Attendance[] @relation("StudentAttendance")
+
+  principalOf     School[]
+  taughtSubjects  ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  passwordResets  PasswordReset[]
+}
+
+model UserSchool {
+  id        String   @id @default(uuid())
+  user_id   String
+  school_id String
+  role      UserRole
+  year      Int
+
+  user   User   @relation(fields: [user_id], references: [id])
+  school School @relation(fields: [school_id], references: [id])
+}
+
+model UserDocument {
+  id       String @id @default(uuid())
+  user_id  String
+  doc_type String
+  file_url String
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model UserAddress {
+  id              String  @id @default(uuid())
+  user_id         String
+  city            String
+  state           String
+  address_line_1  String
+  address_line_2  String?
+  is_primary      Boolean
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Parent {
+  id              String @id @default(uuid())
+  name            String
+  email           String
+  phone_number    String
+  password        String
+  address_line_1  String
+  address_line_2  String?
+
+  students ParentStudent[]
+}
+
+model ParentStudent {
+  id         String @id @default(uuid())
+  student_id String
+  parent_id  String
+  role       String
+
+  student User   @relation("StudentParent", fields: [student_id], references: [id])
+  parent  Parent @relation(fields: [parent_id], references: [id])
+}
+
+model School {
+  id           String     @id @default(uuid())
+  name         String
+  type         SchoolType
+  principal_id String?
+
+  principal User? @relation(fields: [principal_id], references: [id])
+
+  addresses        SchoolAddress[]
+  userSchools      UserSchool[]
+  classSubjects    ClassSubject[]
+  subjectTeachers  ClassSubjectTeacher[]
+  enrollments      StudentSubjectEnrollment[]
+  marks            StudentMarks[]
+  attendance       Attendance[]
+}
+
+model SchoolAddress {
+  id              String @id @default(uuid())
+  school_id       String
+  city            String
+  state           String
+  address_line_1  String
+  address_line_2  String?
+
+  school School @relation(fields: [school_id], references: [id])
+}
+
+model ClassRoom {
+  id    String @id @default(uuid())
+  name  String
+
+  classSubjects   ClassSubject[]
+  teachers        ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  attendance      Attendance[]
+}
+
+model Subject {
+  id    String @id @default(uuid())
+  name  String
+
+  classSubjects   ClassSubject[]
+  teachers        ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  attendance      Attendance[]
+}
+
+model ClassSubject {
+  id         String @id @default(uuid())
+  class_id   String
+  subject_id String
+  school_id  String
+
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model SchoolRoom {
+  id        String @id @default(uuid())
+  school_id String
+  room_no   String
+  capacity  Int
+  type      String
+}
+
+model ClassSubjectTeacher {
+  id          String @id @default(uuid())
+  subject_id  String
+  class_id    String
+  teacher_id  String
+  school_id   String
+  period_slot String
+  room_number String
+  year        Int
+
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  teacher   User      @relation(fields: [teacher_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model StudentSubjectEnrollment {
+  id          String @id @default(uuid())
+  student_id  String
+  class_id    String
+  school_id   String
+  subject_id  String
+  period_slot String
+  year        Int
+
+  student   User      @relation(fields: [student_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model StudentMarks {
+  id             String @id @default(uuid())
+  student_id     String
+  subject_id     String
+  class_id       String
+  school_id      String
+  marks          Int
+  year           Int
+  grade          String
+  exam_type      String
+  exam_component String
+
+  student   User      @relation(fields: [student_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  class_id   String
+  student_id String
+  school_id  String
+  subject_id String
+  teacher_id String
+  status     String
+  date       DateTime
+  year       Int
+
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+
+  student User @relation("StudentAttendance", fields: [student_id], references: [id])
+  teacher User @relation("TeacherAttendance", fields: [teacher_id], references: [id])
+}
+
+model PasswordReset {
+  id           String   @id @default(uuid())
+  user_id      String
+  otp_hash     String
+  reset_token  String
+  is_verified  Boolean
+  is_used      Boolean
+  expires_at   DateTime
+  created_at   DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
 }
