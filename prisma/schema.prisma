@@ -29,27 +29,77 @@ enum SchoolType {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  name        String
-  email       String   @unique
-  phone_no    String
-  password    String
-  role        UserRole
-  year        Int
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   
+  image         String?   
+  phone_no      String
+  password      String?  
+  role          UserRole
+  year          Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  addresses       UserAddress[]
-  documents       UserDocument[]
-  schools         UserSchool[]
-  parentLinks     ParentStudent[] @relation("StudentParent")
+  // Better Auth Relations
+  sessions      Session[]
+  accounts      Account[]
 
-  attendanceTaken Attendance[] @relation("TeacherAttendance")
-  attendance      Attendance[] @relation("StudentAttendance")
-
+  addresses      UserAddress[]
+  documents      UserDocument[]
+  schools        UserSchool[]
+  parentLinks    ParentStudent[] @relation("StudentParent")
+  attendanceTaken Attendance[]    @relation("TeacherAttendance")
+  attendance      Attendance[]    @relation("StudentAttendance")
   principalOf     School[]
   taughtSubjects  ClassSubjectTeacher[]
   enrollments     StudentSubjectEnrollment[]
   marks           StudentMarks[]
   passwordResets  PasswordReset[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }
 
 model UserSchool {
