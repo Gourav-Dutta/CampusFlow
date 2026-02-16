@@ -20,60 +20,330 @@ datasource db {
 // email String
 // }
 
-// enum UserRole {
-//   Teacher
-//   Principal
-//   Student
-//   Clerk
-//   Peon
-// }
+enum UserRole {
+  Teacher
+  Principal
+  Student
+  Clerk
+  Peon
+}
 
-// enum SchoolType {
-//   Secondary
-//   Higher_Secondary
-// }
+enum SchoolType {
+  Secondary
+  Higher_Secondary
+}
+
+model User {
+  // Better Auth core fields
+  id            String    @id 
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // custom business logic fields
+  phone_no      String
+  role          UserRole
+  year          String
+
+  // ---Better-Auth Relations ---
+  sessions      Session[]
+  accounts      Account[]
+
+  // My existing relations
+  addresses       UserAddress[]
+  documents       UserDocument[]
+  schools         UserSchool[]
+  parentLinks     ParentStudent[] @relation("StudentParent")
+  attendanceTaken Attendance[]    @relation("TeacherAttendance")
+  attendance      Attendance[]    @relation("StudentAttendance")
+  principalOf     School[]
+  taughtSubjects  ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  passwordResets  PasswordReset[]
+
+@@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+ 
+}
+
+model UserSchool {
+  id        String   @id @default(uuid())
+  user_id   String
+  school_id String
+  role      UserRole
+  year      Int
+
+  user   User   @relation(fields: [user_id], references: [id])
+  school School @relation(fields: [school_id], references: [id])
+}
+
+model UserDocument {
+  id       String @id @default(uuid())
+  user_id  String
+  doc_type String
+  file_url String
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model UserAddress {
+  id              String  @id @default(uuid())
+  user_id         String
+  city            String
+  state           String
+  address_line_1  String
+  address_line_2  String?
+  is_primary      Boolean
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Parent {
+  id              String @id @default(uuid())
+  name            String
+  email           String
+  phone_number    String
+  password        String
+  address_line_1  String
+  address_line_2  String?
+
+  students ParentStudent[]
+}
+
+model ParentStudent {
+  id         String @id @default(uuid())
+  student_id String
+  parent_id  String
+  role       String
+
+  student User   @relation("StudentParent", fields: [student_id], references: [id])
+  parent  Parent @relation(fields: [parent_id], references: [id])
+}
+
+model School {
+  id           String     @id @default(uuid())
+  name         String
+  type         SchoolType
+  principal_id String?
+
+  principal User? @relation(fields: [principal_id], references: [id])
+
+  addresses        SchoolAddress[]
+  userSchools      UserSchool[]
+  classSubjects    ClassSubject[]
+  subjectTeachers  ClassSubjectTeacher[]
+  enrollments      StudentSubjectEnrollment[]
+  marks            StudentMarks[]
+  attendance       Attendance[]
+}
+
+model SchoolAddress {
+  id              String @id @default(uuid())
+  school_id       String
+  city            String
+  state           String
+  address_line_1  String
+  address_line_2  String?
+
+  school School @relation(fields: [school_id], references: [id])
+}
+
+model ClassRoom {
+  id    String @id @default(uuid())
+  name  String
+
+  classSubjects   ClassSubject[]
+  teachers        ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  attendance      Attendance[]
+}
+
+model Subject {
+  id    String @id @default(uuid())
+  name  String
+
+  classSubjects   ClassSubject[]
+  teachers        ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  attendance      Attendance[]
+}
+
+model ClassSubject {
+  id         String @id @default(uuid())
+  class_id   String
+  subject_id String
+  school_id  String
+
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model SchoolRoom {
+  id        String @id @default(uuid())
+  school_id String
+  room_no   String
+  capacity  Int
+  type      String
+}
+
+model ClassSubjectTeacher {
+  id          String @id @default(uuid())
+  subject_id  String
+  class_id    String
+  teacher_id  String
+  school_id   String
+  period_slot String
+  room_number String
+  year        Int
+
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  teacher   User      @relation(fields: [teacher_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model StudentSubjectEnrollment {
+  id          String @id @default(uuid())
+  student_id  String
+  class_id    String
+  school_id   String
+  subject_id  String
+  period_slot String
+  year        Int
+
+  student   User      @relation(fields: [student_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model StudentMarks {
+  id             String @id @default(uuid())
+  student_id     String
+  subject_id     String
+  class_id       String
+  school_id      String
+  marks          Int
+  year           Int
+  grade          String
+  exam_type      String
+  exam_component String
+
+  student   User      @relation(fields: [student_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  class_id   String
+  student_id String
+  school_id  String
+  subject_id String
+  teacher_id String
+  status     String
+  date       DateTime
+  year       Int
+
+  classroom ClassRoom @relation(fields: [class_id], references: [id])
+  school    School    @relation(fields: [school_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id])
+
+  student User @relation("StudentAttendance", fields: [student_id], references: [id])
+  teacher User @relation("TeacherAttendance", fields: [teacher_id], references: [id])
+}
+
+model PasswordReset {
+  id           String   @id @default(uuid())
+  user_id      String
+  otp_hash     String
+  reset_token  String
+  is_verified  Boolean
+  is_used      Boolean
+  expires_at   DateTime
+  created_at   DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
 
 // model User {
-//   id            String    @id @default(uuid())
+//   id            String    @id
 //   name          String
-//   email         String    @unique
-//   emailVerified Boolean   
-//   image         String?   
-//   phone_no      String
-//   password      String?  
-//   role          UserRole
-//   year          Int
+//   email         String
+//   emailVerified Boolean   @default(false)
+//   image         String?
 //   createdAt     DateTime  @default(now())
 //   updatedAt     DateTime  @updatedAt
-
-//   // Better Auth Relations
 //   sessions      Session[]
 //   accounts      Account[]
 
-//   addresses      UserAddress[]
-//   documents      UserDocument[]
-//   schools        UserSchool[]
-//   parentLinks    ParentStudent[] @relation("StudentParent")
-//   attendanceTaken Attendance[]    @relation("TeacherAttendance")
-//   attendance      Attendance[]    @relation("StudentAttendance")
-//   principalOf     School[]
-//   taughtSubjects  ClassSubjectTeacher[]
-//   enrollments     StudentSubjectEnrollment[]
-//   marks           StudentMarks[]
-//   passwordResets  PasswordReset[]
+//   @@unique([email])
+//   @@map("user")
 // }
 
 // model Session {
 //   id        String   @id
 //   expiresAt DateTime
-//   token     String   @unique
-//   createdAt DateTime
-//   updatedAt DateTime
+//   token     String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 //   ipAddress String?
 //   userAgent String?
 //   userId    String
 //   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+//   @@unique([token])
+//   @@index([userId])
 //   @@map("session")
 // }
 
@@ -82,7 +352,7 @@ datasource db {
 //   accountId             String
 //   providerId            String
 //   userId                String
-//   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 //   accessToken           String?
 //   refreshToken          String?
 //   idToken               String?
@@ -90,286 +360,21 @@ datasource db {
 //   refreshTokenExpiresAt DateTime?
 //   scope                 String?
 //   password              String?
-//   createdAt             DateTime
-//   updatedAt             DateTime
+//   createdAt             DateTime  @default(now())
+//   updatedAt             DateTime  @updatedAt
 
+//   @@index([userId])
 //   @@map("account")
 // }
 
 // model Verification {
-//   id         String    @id
+//   id         String   @id
 //   identifier String
 //   value      String
 //   expiresAt  DateTime
-//   createdAt  DateTime?
-//   updatedAt  DateTime?
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
 
+//   @@index([identifier])
 //   @@map("verification")
 // }
-
-// model UserSchool {
-//   id        String   @id @default(uuid())
-//   user_id   String
-//   school_id String
-//   role      UserRole
-//   year      Int
-
-//   user   User   @relation(fields: [user_id], references: [id])
-//   school School @relation(fields: [school_id], references: [id])
-// }
-
-// model UserDocument {
-//   id       String @id @default(uuid())
-//   user_id  String
-//   doc_type String
-//   file_url String
-
-//   user User @relation(fields: [user_id], references: [id])
-// }
-
-// model UserAddress {
-//   id              String  @id @default(uuid())
-//   user_id         String
-//   city            String
-//   state           String
-//   address_line_1  String
-//   address_line_2  String?
-//   is_primary      Boolean
-
-//   user User @relation(fields: [user_id], references: [id])
-// }
-
-// model Parent {
-//   id              String @id @default(uuid())
-//   name            String
-//   email           String
-//   phone_number    String
-//   password        String
-//   address_line_1  String
-//   address_line_2  String?
-
-//   students ParentStudent[]
-// }
-
-// model ParentStudent {
-//   id         String @id @default(uuid())
-//   student_id String
-//   parent_id  String
-//   role       String
-
-//   student User   @relation("StudentParent", fields: [student_id], references: [id])
-//   parent  Parent @relation(fields: [parent_id], references: [id])
-// }
-
-// model School {
-//   id           String     @id @default(uuid())
-//   name         String
-//   type         SchoolType
-//   principal_id String?
-
-//   principal User? @relation(fields: [principal_id], references: [id])
-
-//   addresses        SchoolAddress[]
-//   userSchools      UserSchool[]
-//   classSubjects    ClassSubject[]
-//   subjectTeachers  ClassSubjectTeacher[]
-//   enrollments      StudentSubjectEnrollment[]
-//   marks            StudentMarks[]
-//   attendance       Attendance[]
-// }
-
-// model SchoolAddress {
-//   id              String @id @default(uuid())
-//   school_id       String
-//   city            String
-//   state           String
-//   address_line_1  String
-//   address_line_2  String?
-
-//   school School @relation(fields: [school_id], references: [id])
-// }
-
-// model ClassRoom {
-//   id    String @id @default(uuid())
-//   name  String
-
-//   classSubjects   ClassSubject[]
-//   teachers        ClassSubjectTeacher[]
-//   enrollments     StudentSubjectEnrollment[]
-//   marks           StudentMarks[]
-//   attendance      Attendance[]
-// }
-
-// model Subject {
-//   id    String @id @default(uuid())
-//   name  String
-
-//   classSubjects   ClassSubject[]
-//   teachers        ClassSubjectTeacher[]
-//   enrollments     StudentSubjectEnrollment[]
-//   marks           StudentMarks[]
-//   attendance      Attendance[]
-// }
-
-// model ClassSubject {
-//   id         String @id @default(uuid())
-//   class_id   String
-//   subject_id String
-//   school_id  String
-
-//   classroom ClassRoom @relation(fields: [class_id], references: [id])
-//   subject   Subject   @relation(fields: [subject_id], references: [id])
-//   school    School    @relation(fields: [school_id], references: [id])
-// }
-
-// model SchoolRoom {
-//   id        String @id @default(uuid())
-//   school_id String
-//   room_no   String
-//   capacity  Int
-//   type      String
-// }
-
-// model ClassSubjectTeacher {
-//   id          String @id @default(uuid())
-//   subject_id  String
-//   class_id    String
-//   teacher_id  String
-//   school_id   String
-//   period_slot String
-//   room_number String
-//   year        Int
-
-//   subject   Subject   @relation(fields: [subject_id], references: [id])
-//   classroom ClassRoom @relation(fields: [class_id], references: [id])
-//   teacher   User      @relation(fields: [teacher_id], references: [id])
-//   school    School    @relation(fields: [school_id], references: [id])
-// }
-
-// model StudentSubjectEnrollment {
-//   id          String @id @default(uuid())
-//   student_id  String
-//   class_id    String
-//   school_id   String
-//   subject_id  String
-//   period_slot String
-//   year        Int
-
-//   student   User      @relation(fields: [student_id], references: [id])
-//   classroom ClassRoom @relation(fields: [class_id], references: [id])
-//   subject   Subject   @relation(fields: [subject_id], references: [id])
-//   school    School    @relation(fields: [school_id], references: [id])
-// }
-
-// model StudentMarks {
-//   id             String @id @default(uuid())
-//   student_id     String
-//   subject_id     String
-//   class_id       String
-//   school_id      String
-//   marks          Int
-//   year           Int
-//   grade          String
-//   exam_type      String
-//   exam_component String
-
-//   student   User      @relation(fields: [student_id], references: [id])
-//   subject   Subject   @relation(fields: [subject_id], references: [id])
-//   classroom ClassRoom @relation(fields: [class_id], references: [id])
-//   school    School    @relation(fields: [school_id], references: [id])
-// }
-
-// model Attendance {
-//   id         String   @id @default(uuid())
-//   class_id   String
-//   student_id String
-//   school_id  String
-//   subject_id String
-//   teacher_id String
-//   status     String
-//   date       DateTime
-//   year       Int
-
-//   classroom ClassRoom @relation(fields: [class_id], references: [id])
-//   school    School    @relation(fields: [school_id], references: [id])
-//   subject   Subject   @relation(fields: [subject_id], references: [id])
-
-//   student User @relation("StudentAttendance", fields: [student_id], references: [id])
-//   teacher User @relation("TeacherAttendance", fields: [teacher_id], references: [id])
-// }
-
-// model PasswordReset {
-//   id           String   @id @default(uuid())
-//   user_id      String
-//   otp_hash     String
-//   reset_token  String
-//   is_verified  Boolean
-//   is_used      Boolean
-//   expires_at   DateTime
-//   created_at   DateTime @default(now())
-
-//   user User @relation(fields: [user_id], references: [id])
-// }
-
-model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-
-  @@unique([email])
-  @@map("user")
-}
-
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([token])
-  @@index([userId])
-  @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([identifier])
-  @@map("verification")
-}
