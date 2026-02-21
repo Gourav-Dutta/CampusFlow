@@ -73,7 +73,8 @@ export async function SignOutAction() {
       headers: await headers(),
     });
     return NextResponse.json({
-      msg: "Logged Out"    })
+      msg: "Logged Out"
+    })
   } catch (err: any) {
     return NextResponse.json({
       msg: `An error occured: ${err.message}`
