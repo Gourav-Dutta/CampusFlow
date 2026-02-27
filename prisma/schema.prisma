@@ -164,6 +164,9 @@ model ParentStudent {
 
   student User   @relation("StudentParent", fields: [student_id], references: [id])
   parent  Parent @relation(fields: [parent_id], references: [id])
+
+  @@unique([student_id, parent_id]) 
+  @@map("parent_student")
 }
 
 model School {
