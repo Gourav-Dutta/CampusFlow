@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
-export async function POST( // Only a user can add their parents
+export async function POST( // Only a user (student) can add their parents
   req: Request,
   { params }: { params: { user_id: string } },
 ) {
@@ -75,7 +75,7 @@ export async function POST( // Only a user can add their parents
   }
 }
 
-export async function GET(
+export async function GET( // Fetch all the parents of a particular student
   req: Request,
   { params }: { params: { user_id: string } },
 ) {

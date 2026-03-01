@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function signUpAction(formData: FormData) {
+  // If the user is student -> student portal, teacher -> Teacher Portal, principle -> Principle Portal
   try {
     const name = formData.get("name") as string;
     const password = formData.get("password") as string;
@@ -42,6 +43,7 @@ export async function signUpAction(formData: FormData) {
 }
 
 export async function SignInAction(formData: FormData) {
+  // If the user is student -> student portal, teacher -> Teacher Portal, principle -> Principle Portal
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -73,11 +75,11 @@ export async function SignOutAction() {
       headers: await headers(),
     });
     return NextResponse.json({
-      msg: "Logged Out"
-    })
+      msg: "Logged Out",
+    });
   } catch (err: any) {
     return NextResponse.json({
-      msg: `An error occured: ${err.message}`
-    })
+      msg: `An error occured: ${err.message}`,
+    });
   }
 }
