@@ -26,7 +26,7 @@ export async function GET( // Get user based on userID
   }
 }
 
-export async function PUT(
+export async function PUT( // Update user based on userID
   req: Request,
   { params }: { params: { id: string } },
 ) {
@@ -80,7 +80,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+export async function DELETE( // Delete user based on userID
   req: Request,
   { params }: { params: { id: string } },
 ) {

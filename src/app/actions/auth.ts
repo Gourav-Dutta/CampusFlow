@@ -1,19 +1,23 @@
 // "use server";
 
-import { userRole } from "@/generated/prisma/enums";
+import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { UserRole } from "@/generated/prisma";
 
 export async function signUpAction(formData: FormData) {
-  // If the user is student -> student portal, teacher -> Teacher Portal, principle -> Principle Portal
+  // If the user is student -> student portal, teacher -> Teacher Portal, principle -> Principle Portal, Parent-> Parent Portal
+  // Issue--
   try {
     const name = formData.get("name") as string;
     const password = formData.get("password") as string;
     const email = formData.get("email") as string;
     const phone_no = formData.get("phone_no") as string;
     const year = formData.get("year") as string;
-    const role = formData.get("role") as userRole;
+    const role = formData.get("role") as UserRole;
+    const studentId = formData.get("studentId") as string;
+    console.log("Code execuation start");
 
     const newUser = await auth.api.signUpEmail({
       body: {
@@ -24,7 +28,22 @@ export async function signUpAction(formData: FormData) {
         role,
         year,
       },
+      // headers: await headers(),
     });
+    console.log(newUser?.user?.id);
+    console.log(role);
+    console.log(studentId);
+
+    if (role === UserRole.Parent && studentId && newUser?.user?.id) {
+      await prisma.parentStudent.create({
+        data: {
+          parent_id: newUser.user.id,
+          student_id: studentId,
+          role: "Guardian",
+        },
+      });
+      console.log("Parent Created");
+    }
     return NextResponse.json(
       {
         msg: "User creted",

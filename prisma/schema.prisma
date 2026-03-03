@@ -22,6 +22,7 @@ enum UserRole {
   Student
   Clerk
   Peon
+  Parent
 }
 
 enum SchoolType {
@@ -42,7 +43,7 @@ model User {
   // custom business logic fields
   phone_no      String
   role          UserRole
-  year          String
+  year          String?
 
   // ---Better-Auth Relations ---
   sessions      Session[]
@@ -52,7 +53,8 @@ model User {
   addresses       UserAddress[]
   documents       UserDocument[]
   schools         UserSchool[]
-  parentLinks     ParentStudent[] @relation("StudentParent")
+  parentLinks     ParentStudent[] @relation("StudentToParent")
+  childLinks    ParentStudent[] @relation("ParentToStudent")
   attendanceTaken Attendance[]    @relation("TeacherAttendance")
   attendance      Attendance[]    @relation("StudentAttendance")
   principalOf     School[]
@@ -140,17 +142,7 @@ model UserAddress {
   user User @relation(fields: [user_id], references: [id])
 }
 
-model Parent {
-  id              String @id @default(uuid())
-  name            String
-  email           String
-  phone_number    String
-  password        String
-  address_line_1  String
-  address_line_2  String?
 
-  students ParentStudent[]
-}
 
 model ParentStudent {
   id         String @id @default(uuid())
@@ -158,11 +150,11 @@ model ParentStudent {
   parent_id  String
   role       String
 
-  student User   @relation("StudentParent", fields: [student_id], references: [id])
-  parent  Parent @relation(fields: [parent_id], references: [id])
+  student User   @relation("StudentToParent", fields: [student_id], references: [id])
+  parent  User @relation("ParentToStudent", fields: [parent_id], references: [id])
 
   @@unique([student_id, parent_id]) 
-  @@map("parent_student")
+ 
 }
 
 model School {
