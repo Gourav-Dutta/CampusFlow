@@ -102,7 +102,7 @@ export async function DELETE( // Delete user based on userID
     });
     return NextResponse.json(
       {
-        msg: "User Found",
+        msg: "User Deleted Successfully",
         data: user,
       },
       { status: 200 },
