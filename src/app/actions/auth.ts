@@ -1,4 +1,4 @@
-// "use server";
+"use server";
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
@@ -28,7 +28,7 @@ export async function signUpAction(formData: FormData) {
         role,
         year,
       },
-      // headers: await headers(),
+      headers: await headers(),
     });
     console.log(newUser?.user?.id);
     console.log(role);
