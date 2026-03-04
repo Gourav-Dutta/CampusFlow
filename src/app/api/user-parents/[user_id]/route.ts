@@ -1,5 +1,5 @@
-// import prisma from "@/lib/prisma";
-// import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 // import bcrypt from "bcrypt";
 
 // export async function POST( // Only a user (student) can add their parents
@@ -75,32 +75,43 @@
 //   }
 // }
 
-// // export async function GET( // Fetch all the parents of a particular student
-// //   req: Request,
-// //   { params }: { params: { user_id: string } },
-// // ) {
-// //   try {
-// //     const parents = await prisma.parent.findMany({
-// //       where: {
-// //         students: {
-// //           some: {
-// //             student_id: params.user_id,
-// //           },
-// //         },
-// //       },
-// //     });
+export async function GET( // Fetch all the parents of a particular student
+  req: Request,
+  { params }: { params: { user_id: string } },
+) {
+  try {
+    const validateUser = await prisma.user.findUnique({
+      where: {
+        id: params.user_id,
+      },
+    });
+    if (!validateUser)
+      return NextResponse.json(
+        {
+          msg: "User not found",
+        },
+        { status: 404 },
+      );
+    const parents = await prisma.parentStudent.findMany({
+      where: {
+        student_id: params.user_id,
+      },
+      include: {
+        parent: true,
+      },
+    });
 
-// //     return NextResponse.json({
-// //       msg: "Parents fetched successfully",
-// //       data: parents,
-// //     });
-// //   } catch (err: any) {
-// //     return NextResponse.json(
-// //       { msg: `Error fetching parents: ${err.message}` },
-// //       { status: 500 },
-// //     );
-// //   }
-// // }
+    return NextResponse.json({
+      msg: "Parents fetched successfully",
+      data: parents,
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { msg: `Error fetching parents: ${err.message}` },
+      { status: 500 },
+    );
+  }
+}
 
 // // export async function PATCH(
 // //   req: Request,

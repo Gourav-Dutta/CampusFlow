@@ -117,8 +117,8 @@ model UserSchool {
   role      UserRole
   year      Int
 
-  user   User   @relation(fields: [user_id], references: [id])
-  school School @relation(fields: [school_id], references: [id])
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model UserDocument {
@@ -127,7 +127,7 @@ model UserDocument {
   doc_type String
   file_url String
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model UserAddress {
@@ -139,7 +139,7 @@ model UserAddress {
   address_line_2  String?
   is_primary      Boolean
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 
@@ -150,8 +150,8 @@ model ParentStudent {
   parent_id  String
   role       String
 
-  student User   @relation("StudentToParent", fields: [student_id], references: [id])
-  parent  User @relation("ParentToStudent", fields: [parent_id], references: [id])
+  student User   @relation("StudentToParent", fields: [student_id], references: [id], onDelete: Cascade)
+  parent  User @relation("ParentToStudent", fields: [parent_id], references: [id], onDelete: Cascade)
 
   @@unique([student_id, parent_id]) 
  
@@ -172,6 +172,7 @@ model School {
   enrollments      StudentSubjectEnrollment[]
   marks            StudentMarks[]
   attendance       Attendance[]
+  classrooms       ClassRoom[]
 }
 
 model SchoolAddress {
@@ -182,13 +183,15 @@ model SchoolAddress {
   address_line_1  String
   address_line_2  String?
 
-  school School @relation(fields: [school_id], references: [id])
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model ClassRoom {
   id    String @id @default(uuid())
   name  String
 
+  school_id String
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSubjects   ClassSubject[]
   teachers        ClassSubjectTeacher[]
   enrollments     StudentSubjectEnrollment[]
@@ -213,9 +216,9 @@ model ClassSubject {
   subject_id String
   school_id  String
 
-  classroom ClassRoom @relation(fields: [class_id], references: [id])
-  subject   Subject   @relation(fields: [subject_id], references: [id])
-  school    School    @relation(fields: [school_id], references: [id])
+  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model SchoolRoom {
@@ -236,10 +239,10 @@ model ClassSubjectTeacher {
   room_number String
   year        Int
 
-  subject   Subject   @relation(fields: [subject_id], references: [id])
-  classroom ClassRoom @relation(fields: [class_id], references: [id])
-  teacher   User      @relation(fields: [teacher_id], references: [id])
-  school    School    @relation(fields: [school_id], references: [id])
+  subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  teacher   User      @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+  school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model StudentSubjectEnrollment {
@@ -251,13 +254,14 @@ model StudentSubjectEnrollment {
   period_slot String
   year        Int
 
-  student   User      @relation(fields: [student_id], references: [id])
-  classroom ClassRoom @relation(fields: [class_id], references: [id])
-  subject   Subject   @relation(fields: [subject_id], references: [id])
-  school    School    @relation(fields: [school_id], references: [id])
+  student   User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
+    @@unique([student_id, subject_id, year])
 }
 
-model StudentMarks {
+model StudentMarks {           // This is a recored
   id             String @id @default(uuid())
   student_id     String
   subject_id     String
@@ -275,7 +279,7 @@ model StudentMarks {
   school    School    @relation(fields: [school_id], references: [id])
 }
 
-model Attendance {
+model Attendance {             // This is a record
   id         String   @id @default(uuid())
   class_id   String
   student_id String
@@ -304,7 +308,7 @@ model PasswordReset {
   expires_at   DateTime
   created_at   DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 // model User {
