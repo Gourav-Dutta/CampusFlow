@@ -99,6 +99,9 @@ export async function DELETE( // Delete user based on userID
       );
     const user = await prisma.user.delete({
       where: { id: userId },
+      include: {
+        parentLinks: true,
+      },
     });
     return NextResponse.json(
       {
