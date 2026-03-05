@@ -25,6 +25,14 @@ enum UserRole {
   Parent
 }
 
+enum DocumentType {
+  AADHAR
+  PAN
+  MARKSHEET
+  PHOTO
+  OTHER
+}
+
 enum RelationStatus{
   Pending
   Approved
@@ -130,8 +138,10 @@ model UserSchool {
 model UserDocument {
   id       String @id @default(uuid())
   user_id  String
-  doc_type String
-  file_url String
+  doc_type   DocumentType
+  public_id  String
+  file_url   String
+  created_at DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
