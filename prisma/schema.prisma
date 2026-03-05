@@ -25,6 +25,12 @@ enum UserRole {
   Parent
 }
 
+enum RelationStatus{
+  Pending
+  Approved
+  Rejected
+}
+
 enum SchoolType {
   Secondary
   Higher_Secondary
@@ -149,6 +155,7 @@ model ParentStudent {
   student_id String
   parent_id  String
   role       String
+  status     RelationStatus @default(Pending)
 
   student User   @relation("StudentToParent", fields: [student_id], references: [id], onDelete: Cascade)
   parent  User @relation("ParentToStudent", fields: [parent_id], references: [id], onDelete: Cascade)
