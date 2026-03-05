@@ -45,6 +45,7 @@ export const auth = betterAuth({
             parent_id: user.id,
             student_id: studentId,
             role: "Guardian",
+            status: "Pending",
           },
         });
 
