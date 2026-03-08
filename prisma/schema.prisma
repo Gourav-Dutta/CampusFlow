@@ -23,6 +23,7 @@ enum UserRole {
   Clerk
   Peon
   Parent
+  Admin
 }
 
 enum DocumentType {
