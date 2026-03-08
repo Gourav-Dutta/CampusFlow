@@ -3,7 +3,8 @@ import { RelationStatus } from "@/generated/prisma";
 import { NextResponse } from "next/server";
 // import bcrypt from "bcrypt";
 
-export async function POST( // Only a parent make this request, Parent adding a student request - A parent can add a user as relation but the status will be pending. Only that user whom the request is through approved it
+export async function POST( // Parent are add by principle by using the add parent button like other user. This API only make a request by parent(already added) to parentStudent table.
+  // Only a parent make this request, Parent adding a student request - A parent can add a user as relation but the status will be pending. Only that user whom the request is through approved it
   req: Request,
   { params }: { params: { user_id: string } },
 ) {
