@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 export async function GET(req: Request) {
   try {
+    const deny = await requireAdmin();
+    if (deny) return deny;
     const allUser = await prisma.user.findMany();
     console.log("All user found");
     return NextResponse.json(

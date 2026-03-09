@@ -2,9 +2,13 @@
 
 import { SchoolType, UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/requireAdmin";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
+
   try {
     const formData = await req.formData();
     const name = formData.get("schoolName") as string;
@@ -62,6 +66,9 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
+
   try {
     const schools = await prisma.school.findMany();
     return NextResponse.json(
