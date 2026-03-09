@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/requireAdmin";
 import { NextResponse } from "next/server";
 import { SchoolType } from "@/generated/prisma";
 
@@ -6,6 +7,9 @@ export async function PUT(
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
+
   try {
     const formData = await req.formData();
     const school_id = params.school_id;
@@ -74,6 +78,9 @@ export async function DELETE(
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
+
   try {
     const validateSchool = await prisma.school.findUnique({
       where: {
