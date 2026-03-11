@@ -103,8 +103,8 @@ export async function GET(
   try {
     const deny = await requireAdmin();
     if (deny) return deny;
-    const findSchollAddress = await prisma.schoolAddress.findUnique({
-      where: { id: params.school_id },
+    const findSchollAddress = await prisma.schoolAddress.findMany({
+      where: { school_id: params.school_id },
       include: {
         school: true,
       },
@@ -137,8 +137,8 @@ export async function DELETE(
       });
     const deny = await requireAdmin();
     if (deny) return deny;
-    const deleteAddress = await prisma.schoolAddress.delete({
-      where: { id: params.school_id },
+    const deleteAddress = await prisma.schoolAddress.deleteMany({
+      where: { school_id: params.school_id },
     });
     return NextResponse.json({
       msg: "Address deleted successfully",
