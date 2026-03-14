@@ -51,7 +51,7 @@ export async function POST(
   }
 }
 
-export async function PUT(
+export async function PUT( // Convert it to school_id
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
@@ -59,13 +59,13 @@ export async function PUT(
     const deny = await requireAdmin();
     if (deny) return deny;
     const formData = await req.formData();
-    const validateSchool = await prisma.school.findUnique({
-      where: { id: params.school_id },
+    const validateSchoolAddress = await prisma.schoolAddress.findMany({
+      where: { school_id: params.school_id },
     });
 
-    if (!validateSchool)
+    if (!validateSchoolAddress)
       return NextResponse.json({
-        msg: "No school ",
+        msg: "No school address",
       });
     const updateData: any = {};
     if (formData.get("city")) updateData.city = formData.get("city") as string;
@@ -78,8 +78,8 @@ export async function PUT(
         | string
         | null;
 
-    const updatedAddress = await prisma.schoolAddress.update({
-      where: { id: params.school_id },
+    const updatedAddress = await prisma.schoolAddress.updateMany({
+      where: { school_id: params.school_id },
       data: updateData,
     });
 
@@ -96,7 +96,7 @@ export async function PUT(
   }
 }
 
-export async function GET(
+export async function GET( // Based on specific school_id
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
@@ -128,8 +128,8 @@ export async function DELETE(
   { params }: { params: { school_id: string } },
 ) {
   try {
-    const validateSchool = await prisma.school.findUnique({
-      where: { id: params.school_id },
+    const validateSchool = await prisma.schoolAddress.findMany({
+      where: { school_id: params.school_id },
     });
     if (!validateSchool)
       return NextResponse.json({
