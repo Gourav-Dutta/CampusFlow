@@ -1,0 +1,126 @@
+// Only for ADMIN & PRINCIPLE
+// One a classromm is specify for a particular school, it can't be change
+
+import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData();
+    const name = formData.get("name") as string;
+    const school_id = formData.get("school_id") as string;
+    const validateSchool = await prisma.school.findUnique({
+      where: { id: school_id },
+    });
+    if (!validateSchool) {
+      return NextResponse.json({
+        msg: "School not found",
+      });
+    }
+    const newClassRoom = await prisma.classRoom.create({
+      data: {
+        name,
+        school_id,
+      },
+    });
+    return NextResponse.json({
+      msg: "Classroom created successfully",
+      data: newClassRoom,
+    });
+  } catch (err: any) {
+    console.error("Database Error:", err);
+    return NextResponse.json(
+      { msg: `An error occurred: ${err.message}` },
+      { status: 500 },
+    );
+  }
+}
+
+export async function GET(
+  req: Request,
+  { params }: { params: { class_id: string } },
+) {
+  try {
+    const findClassRoom = await prisma.classRoom.findUnique({
+      where: { id: params.class_id },
+    });
+    if (!findClassRoom) {
+      return NextResponse.json({
+        msg: "Classroom not found",
+      });
+    }
+    return NextResponse.json({
+      msg: "Classroom fetched successfully",
+      data: findClassRoom,
+    });
+  } catch (err: any) {
+    console.error("Database Error:", err);
+    return NextResponse.json(
+      { msg: `An error occurred: ${err.message}` },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { class_id: string } },
+) {
+  try {
+    const formData = await req.formData();
+    const name = formData.get("name") as string;
+    const validateClassRoom = await prisma.classRoom.findUnique({
+      where: { id: params.class_id },
+    });
+    if (!validateClassRoom) {
+      return NextResponse.json({
+        msg: "Classroom not found",
+      });
+    }
+    const updateClassRoom = await prisma.classRoom.update({
+      where: { id: params.class_id },
+      data: {
+        name,
+      },
+    });
+    return NextResponse.json({
+      msg: "Classroom updated successfully",
+      data: updateClassRoom,
+    });
+  } catch (err: any) {
+    console.error("Database Error:", err);
+    return NextResponse.json(
+      { msg: `An error occurred: ${err.message}` },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { class_id: string } },
+) {
+  try {
+    const findClassRoom = await prisma.classRoom.findUnique({
+      where: { id: params.class_id },
+    });
+    if (!findClassRoom) {
+      return NextResponse.json({
+        msg: "Classroom not found",
+      });
+    }
+    const deleteClassRoom = await prisma.classRoom.delete({
+      where: { id: params.class_id },
+    });
+    return NextResponse.json({
+      msg: "Classroom deleted successfully",
+      data: deleteClassRoom,
+    });
+  } catch (err: any) {
+    console.error("Database Error:", err);
+    return NextResponse.json(
+      { msg: `An error occurred: ${err.message}` },
+      { status: 500 },
+    );
+  }
+}
