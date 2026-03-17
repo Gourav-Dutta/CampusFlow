@@ -123,7 +123,7 @@ export async function GET( // Based on specific school_id
   }
 }
 
-export async function DELETE(
+export async function DELETE( // Based  on school id
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
