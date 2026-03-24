@@ -3,12 +3,15 @@
 
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminPrinciple } from "@/lib/requireAdminPrinciple";
 
 export async function GET(
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
   try {
+    const deny = await requireAdminPrinciple();
+    if (deny) return deny;
     const findClassRoom = await prisma.classRoom.findMany({
       where: { school_id: params.school_id },
     });
@@ -35,6 +38,8 @@ export async function DELETE(
   { params }: { params: { school_id: string } },
 ) {
   try {
+    const deny = await requireAdminPrinciple();
+    if (deny) return deny;
     const findClassRoom = await prisma.classRoom.findMany({
       where: { school_id: params.school_id },
     });
