@@ -116,3 +116,33 @@ export async function DELETE(
     );
   }
 }
+
+export async function GET(
+  req: Request,
+  { params }: { params: { school_id: string } },
+) {
+  try {
+    const deny = await requireAdmin();
+    if (deny) return deny;
+    const school = await prisma.school.findUnique({
+      where: { id: params.school_id },
+    });
+
+    if (!school)
+      return NextResponse.json({
+        msg: "No school found with that resources",
+        status: 404,
+      });
+
+    return NextResponse.json({
+      msg: "School fetched successfuly",
+      data: school,
+      status: 200,
+    });
+  } catch (err: any) {
+    return NextResponse.json({
+      msg: `An error occured: ${err.message}`,
+      status: 400,
+    });
+  }
+}
