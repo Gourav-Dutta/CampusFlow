@@ -33,6 +33,7 @@ export async function GET(
   }
 }
 
+// Delete all class of a school. Suppose school is deleted, then all classRomm related to that school have to deleted
 export async function DELETE(
   req: Request,
   { params }: { params: { school_id: string } },

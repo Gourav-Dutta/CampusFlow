@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// On the basis of user id
 export async function POST(
   req: Request,
   { params }: { params: { id: string } },
@@ -73,7 +74,7 @@ export async function POST(
     );
   }
 }
-
+// Put user-address id not user id:
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } },
