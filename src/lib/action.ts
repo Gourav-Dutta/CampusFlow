@@ -8,8 +8,8 @@ export async function searchSchools(formData: FormData) {
 
   const schools = await prisma.school.findMany({
     where: {
-      addresses: {
-        some: {
+      address: {
+        is: {
           // 'mode: insensitive' makes "Kolkata" match "kolkata"
           city: city ? { contains: city, mode: "insensitive" } : undefined,
           state: state ? { equals: state, mode: "insensitive" } : undefined,
@@ -17,7 +17,7 @@ export async function searchSchools(formData: FormData) {
       },
     },
     include: {
-      addresses: true,
+      address: true,
     },
   });
 

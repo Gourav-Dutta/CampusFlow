@@ -183,7 +183,7 @@ model School {
 
   principal User? @relation(fields: [principal_id], references: [id])
 
-  addresses        SchoolAddress[]
+  address          SchoolAddress?
   userSchools      UserSchool[]
   classSubjects    ClassSubject[]
   subjectTeachers  ClassSubjectTeacher[]

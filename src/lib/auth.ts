@@ -43,34 +43,34 @@ export const auth = betterAuth({
         }
       }
     }),
-    after: createAuthMiddleware(async (ctx) => {
-      const hookCtx = ctx as unknown as HookEndpointContext;
+    // after: createAuthMiddleware(async (ctx) => {
+    //   const hookCtx = ctx as unknown as HookEndpointContext;
 
-      // only run after user signup
-      if (hookCtx.path !== "/sign-up/email") return;
+    //   // only run after user signup
+    //   if (hookCtx.path !== "/sign-up/email") return;
 
-      const user =
-        hookCtx.context?.newSession?.user ?? hookCtx.context?.session?.user;
-      const studentId = (hookCtx.body as { studentId?: string })?.studentId;
+    //   const user =
+    //     hookCtx.context?.newSession?.user ?? hookCtx.context?.session?.user;
+    //   const studentId = (hookCtx.body as { studentId?: string })?.studentId;
 
-      console.log("Hook triggered:", user?.id);
+    //   console.log("Hook triggered:", user?.id);
 
-      if (user?.role === "Parent" && studentId) {
-        await prisma.parentStudent.create({
-          data: {
-            parent_id: user.id,
-            student_id: studentId,
-            role: "Guardian",
-            status: "Pending",
-          },
-          include: {
-            parent: true,
-            student: true,
-          },
-        });
+    //   if (user?.role === "Parent" && studentId) {
+    //     await prisma.parentStudent.create({
+    //       data: {
+    //         parent_id: user.id,
+    //         student_id: studentId,
+    //         role: "Guardian",
+    //         status: "Pending",
+    //       },
+    //       include: {
+    //         parent: true,
+    //         student: true,
+    //       },
+    //     });
 
-        console.log("ParentStudent relation created");
-      }
-    }),
+    //     console.log("ParentStudent relation created");
+    //   }
+    // }),
   },
 });
