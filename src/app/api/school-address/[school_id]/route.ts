@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
 
+// One school can have only one relation
 export async function POST(
   req: Request,
   { params }: { params: { school_id: string } },
@@ -133,7 +134,7 @@ export async function DELETE( // Based  on school id
     });
     if (!validateSchool)
       return NextResponse.json({
-        msg: "No school ",
+        msg: "No school address present with this id",
       });
     const deny = await requireAdmin();
     if (deny) return deny;
