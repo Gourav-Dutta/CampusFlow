@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/generated/prisma";
+import { redirect } from "next/navigation";
 
 export async function signUpAction(formData: FormData) {
   // If the user is student -> student portal, teacher -> Teacher Portal, principle -> Principle Portal, Parent-> Parent Portal
@@ -67,24 +68,35 @@ export async function SignInAction(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    console.log("Signing in...");
     const user = await auth.api.signInEmail({
       body: {
         email,
         password,
       },
+      headers: await headers(),
     });
+    const role = user?.user?.role;
+    console.log(role);
+    // if (role === "Admin") redirect("/admin");
+    // if (role === "Principal") redirect("/principal");
+    // if (role === "Teacher") redirect("/teacher");
+    // if (role === "Student") redirect("/student");
+    // if (role === "Parent") redirect("/parent");
 
-    return NextResponse.json({
-      msg: "User logged in Successfully",
-      data: user,
-    });
+    // return NextResponse.json({
+    //   msg: "User logged in Successfully",
+    //   data: user,
+    // });
+    return {
+      status: "Success",
+      data: user
+    }
   } catch (err: any) {
-    return NextResponse.json(
-      {
-        msg: `An error occured: ${err.message}`,
-      },
-      { status: 500 },
-    );
+    return {
+      status: "Fail",
+      msg: err.message,
+    };
   }
 }
 
