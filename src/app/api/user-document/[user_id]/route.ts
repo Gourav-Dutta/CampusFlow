@@ -1,3 +1,5 @@
+// This portion is only for the particular user to upload, update, fetch and delete their documents. This is not for admin to manage the documents of users. Admin will have separate apis for that. This is only for user to manage their own documents.
+
 import prisma from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
