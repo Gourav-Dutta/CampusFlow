@@ -77,6 +77,7 @@ model User {
   enrollments     StudentSubjectEnrollment[]
   marks           StudentMarks[]
   passwordResets  PasswordReset[]
+  studentClasses StudentClass[]
 
 @@map("user")
 }
@@ -125,12 +126,12 @@ model Verification {
  
 }
 
+// Which user related to which school, and in which year. 
 model UserSchool {
   id        String   @id @default(uuid())
   user_id   String
   school_id String
-  role      UserRole
-  year      Int
+  year      String
 
   user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
@@ -191,6 +192,8 @@ model School {
   marks            StudentMarks[]
   attendance       Attendance[]
   classrooms       ClassRoom[]
+  studentClasses    StudentClass[]
+  schoolRooms       SchoolRoom[]
 }
 
 model SchoolAddress {
@@ -206,6 +209,9 @@ model SchoolAddress {
   @@index([state, city])
 }
 
+// This is not physical classRoom, but its like which class like class V, class Ci etc. 
+// using class is not allowed.
+// As many school have many school, like some may have secondary level, some may have higher secondary level, so classRoom is a entity which will be linked to school and then we can link subject to that classRoom.
 model ClassRoom {
   id    String @id @default(uuid())
   name  String
@@ -217,6 +223,20 @@ model ClassRoom {
   enrollments     StudentSubjectEnrollment[]
   marks           StudentMarks[]
   attendance      Attendance[]
+  studentClasses StudentClass[]
+}
+
+// One student can study class V in one school, and same student can study class VI in another school, so we need to link student to class and school both. This is the reason we have created this table, which will link student to class and school both.
+model StudentClass{
+  id String @id @default(uuid())
+  student_id String
+  class_id String
+  school_id String
+  year Int
+
+  student User @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model Subject {
@@ -241,12 +261,16 @@ model ClassSubject {
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
+// Which school has how many rooms, and what type of rooms, like lab, class room, library etc. This is physical room which is linked to school, and then we can link that room to class subject teacher for taking attendance and marks entry.
 model SchoolRoom {
   id        String @id @default(uuid())
   school_id String
   room_no   String
   capacity  Int
   type      String
+
+  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  classSubjectTeachers ClassSubjectTeacher[]
 }
 
 model ClassSubjectTeacher {
@@ -256,15 +280,18 @@ model ClassSubjectTeacher {
   teacher_id  String
   school_id   String
   period_slot String
-  room_number String
+  schoolRoom_id String   // This is linked to SchoolRoom table, that define in which room the class will be held.
   year        Int
 
   subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
   teacher   User      @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  schoolRoom SchoolRoom @relation(fields: [schoolRoom_id], references: [id], onDelete: Cascade)
 }
 
+// I can get student school id of a partcular class.
+// This is for the student. He can choose subject for a particular class. We find student's school'id, class'id and then link it .
 model StudentSubjectEnrollment {
   id          String @id @default(uuid())
   student_id  String
