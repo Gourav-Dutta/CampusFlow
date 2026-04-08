@@ -212,6 +212,7 @@ model SchoolAddress {
 // This is not physical classRoom, but its like which class like class V, class Ci etc. 
 // using class is not allowed.
 // As many school have many school, like some may have secondary level, some may have higher secondary level, so classRoom is a entity which will be linked to school and then we can link subject to that classRoom.
+// I goes with this approach- School A call class V as class V, but school B can call Grade 5, so we can link classRoom to school and then link subject to classRoom, so we can maintain the record of which subject is taught in which class in which school.
 model ClassRoom {
   id    String @id @default(uuid())
   name  String
@@ -224,6 +225,22 @@ model ClassRoom {
   marks           StudentMarks[]
   attendance      Attendance[]
   studentClasses StudentClass[]
+  classSections ClassSection[]
+}
+
+// The name should be like V-A(for class V- A section) etc.
+model ClassSection{
+  id String @id @default(uuid())
+  name String
+  class_id String
+
+  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  studentClasses StudentClass[]
+  classSubjects   ClassSubject[]
+  classSubjectTeachers ClassSubjectTeacher[]
+  studentSubjectEnrollments StudentSubjectEnrollment[]
+  attendance Attendance[]
+  marks StudentMarks[]
 }
 
 // One student can study class V in one school, and same student can study class VI in another school, so we need to link student to class and school both. This is the reason we have created this table, which will link student to class and school both.
@@ -232,11 +249,13 @@ model StudentClass{
   student_id String
   class_id String
   school_id String
+  section_id String
   year Int
 
   student User @relation(fields: [student_id], references: [id], onDelete: Cascade)
   classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
   school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
 model Subject {
@@ -255,10 +274,12 @@ model ClassSubject {
   class_id   String
   subject_id String
   school_id  String
+  section_id String
 
   classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
   subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
 // Which school has how many rooms, and what type of rooms, like lab, class room, library etc. This is physical room which is linked to school, and then we can link that room to class subject teacher for taking attendance and marks entry.
@@ -279,6 +300,7 @@ model ClassSubjectTeacher {
   class_id    String
   teacher_id  String
   school_id   String
+  section_id String
   period_slot String
   schoolRoom_id String   // This is linked to SchoolRoom table, that define in which room the class will be held.
   year        Int
@@ -288,6 +310,7 @@ model ClassSubjectTeacher {
   teacher   User      @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
   schoolRoom SchoolRoom @relation(fields: [schoolRoom_id], references: [id], onDelete: Cascade)
+  classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
 // I can get student school id of a partcular class.
@@ -297,6 +320,7 @@ model StudentSubjectEnrollment {
   student_id  String
   class_id    String
   school_id   String
+  section_id String
   subject_id  String
   period_slot String
   year        Int
@@ -305,6 +329,7 @@ model StudentSubjectEnrollment {
   classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
   subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
     @@unique([student_id, subject_id, year])
 }
 
@@ -314,6 +339,7 @@ model StudentMarks {           // This is a recored
   subject_id     String
   class_id       String
   school_id      String
+  section_id     String
   marks          Int
   year           Int
   grade          String
@@ -324,6 +350,7 @@ model StudentMarks {           // This is a recored
   subject   Subject   @relation(fields: [subject_id], references: [id])
   classroom ClassRoom @relation(fields: [class_id], references: [id])
   school    School    @relation(fields: [school_id], references: [id])
+  classSection ClassSection @relation(fields: [section_id], references: [id])
 }
 
 model Attendance {             // This is a record
@@ -331,6 +358,7 @@ model Attendance {             // This is a record
   class_id   String
   student_id String
   school_id  String
+  section_id String
   subject_id String
   teacher_id String
   status     String
@@ -343,6 +371,7 @@ model Attendance {             // This is a record
 
   student User @relation("StudentAttendance", fields: [student_id], references: [id])
   teacher User @relation("TeacherAttendance", fields: [teacher_id], references: [id])
+  classSection ClassSection @relation(fields: [section_id], references: [id])
 }
 
 model PasswordReset {

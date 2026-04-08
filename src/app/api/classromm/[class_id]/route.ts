@@ -1,5 +1,6 @@
 // Only for ADMIN & PRINCIPLE
-// One a classromm is specify for a particular school, we can't change school-id in class section
+// One a classromm is specify for a particular school, we can't change school-id in class section\
+// Thisis not physical classRoom but actual class like class VI etc.
 
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
