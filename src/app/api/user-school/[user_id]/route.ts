@@ -25,12 +25,26 @@ export async function POST(req: Request, {params}: {params: {user_id: string}}){
         const schoolId = formData.get("schoolId") as string;
         // const role = formData.get("role") as userRole;
         const year = formData.get("year") as string;
+        const is_current_raw = formData.get("is_current") as string;
+        const is_current_boolean = is_current_raw === "true" ? true: false; // I wil make this true by default in thr forntend.
+        if(is_current_boolean){
+            await prisma.userSchool.updateMany({
+                where: {
+                    user_id: user_id,
+                    is_current: true
+                },
+                data: {
+                    is_current: false
+                }
+            })
+        }
 
         const schoolStudent = await prisma.userSchool.create({
             data: {
                 user_id: user_id,
                 school_id: schoolId,
-                year: year
+                year: year,
+                is_current: is_current_boolean
             },
         });
         return NextResponse.json({
