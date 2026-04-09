@@ -14,8 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 enum UserRole {
   Teacher
   Principal
@@ -34,7 +32,7 @@ enum DocumentType {
   OTHER
 }
 
-enum RelationStatus{
+enum RelationStatus {
   Pending
   Approved
   Rejected
@@ -47,39 +45,39 @@ enum SchoolType {
 
 model User {
   // Better Auth core fields
-  id            String    @id 
+  id            String   @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // custom business logic fields
-  phone_no      String
-  role          UserRole
-  year          String?
+  phone_no String
+  role     UserRole
+  year     String?
 
   // ---Better-Auth Relations ---
-  sessions      Session[]
-  accounts      Account[]
+  sessions Session[]
+  accounts Account[]
 
   // My existing relations
   addresses       UserAddress[]
   documents       UserDocument[]
   schools         UserSchool[]
-  parentLinks     ParentStudent[] @relation("StudentToParent")
-  childLinks    ParentStudent[] @relation("ParentToStudent")
-  attendanceTaken Attendance[]    @relation("TeacherAttendance")
-  attendance      Attendance[]    @relation("StudentAttendance")
+  parentLinks     ParentStudent[]            @relation("StudentToParent")
+  childLinks      ParentStudent[]            @relation("ParentToStudent")
+  attendanceTaken Attendance[]               @relation("TeacherAttendance")
+  attendance      Attendance[]               @relation("StudentAttendance")
   principalOf     School[]
   taughtSubjects  ClassSubjectTeacher[]
   enrollments     StudentSubjectEnrollment[]
   marks           StudentMarks[]
   passwordResets  PasswordReset[]
-  studentClasses StudentClass[]
+  studentClasses  StudentClass[]
 
-@@map("user")
+  @@map("user")
 }
 
 model Session {
@@ -92,8 +90,6 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-
 }
 
 model Account {
@@ -101,7 +97,7 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -111,8 +107,6 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
-
-
 }
 
 model Verification {
@@ -122,58 +116,54 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime?
   updatedAt  DateTime?
-
- 
 }
 
 // Which user related to which school, and in which year. 
 model UserSchool {
-  id        String   @id @default(uuid())
-  user_id   String
-  school_id String
-  year      String
+  id         String  @id @default(uuid())
+  user_id    String
+  school_id  String
+  year       String
+  is_current Boolean 
 
   user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
 }
 
 model UserDocument {
-  id       String @id @default(uuid())
-  user_id  String
+  id         String       @id @default(uuid())
+  user_id    String
   doc_type   DocumentType
   public_id  String
   file_url   String
-  created_at DateTime @default(now())
+  created_at DateTime     @default(now())
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model UserAddress {
-  id              String  @id @default(uuid())
-  user_id         String
-  city            String
-  state           String
-  address_line_1  String
-  address_line_2  String?
-  is_primary      Boolean
+  id             String  @id @default(uuid())
+  user_id        String
+  city           String
+  state          String
+  address_line_1 String
+  address_line_2 String?
+  is_primary     Boolean
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-
-
 model ParentStudent {
-  id         String @id @default(uuid())
+  id         String         @id @default(uuid())
   student_id String
   parent_id  String
   role       String
   status     RelationStatus @default(Pending)
 
-  student User   @relation("StudentToParent", fields: [student_id], references: [id], onDelete: Cascade)
+  student User @relation("StudentToParent", fields: [student_id], references: [id], onDelete: Cascade)
   parent  User @relation("ParentToStudent", fields: [parent_id], references: [id], onDelete: Cascade)
 
-  @@unique([student_id, parent_id]) 
- 
+  @@unique([student_id, parent_id])
 }
 
 model School {
@@ -184,27 +174,28 @@ model School {
 
   principal User? @relation(fields: [principal_id], references: [id])
 
-  address          SchoolAddress?
-  userSchools      UserSchool[]
-  classSubjects    ClassSubject[]
-  subjectTeachers  ClassSubjectTeacher[]
-  enrollments      StudentSubjectEnrollment[]
-  marks            StudentMarks[]
-  attendance       Attendance[]
-  classrooms       ClassRoom[]
-  studentClasses    StudentClass[]
-  schoolRooms       SchoolRoom[]
+  address         SchoolAddress?
+  userSchools     UserSchool[]
+  classSubjects   ClassSubject[]
+  subjectTeachers ClassSubjectTeacher[]
+  enrollments     StudentSubjectEnrollment[]
+  marks           StudentMarks[]
+  attendance      Attendance[]
+  classrooms      ClassRoom[]
+  studentClasses  StudentClass[]
+  schoolRooms     SchoolRoom[]
 }
 
 model SchoolAddress {
-  id              String @id @default(uuid())
-  school_id       String @unique
-  city            String
-  state           String
-  address_line_1  String
-  address_line_2  String?
+  id             String  @id @default(uuid())
+  school_id      String  @unique
+  city           String
+  state          String
+  address_line_1 String
+  address_line_2 String?
 
   school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+
   @@index([city])
   @@index([state, city])
 }
@@ -214,59 +205,59 @@ model SchoolAddress {
 // As many school have many school, like some may have secondary level, some may have higher secondary level, so classRoom is a entity which will be linked to school and then we can link subject to that classRoom.
 // I goes with this approach- School A call class V as class V, but school B can call Grade 5, so we can link classRoom to school and then link subject to classRoom, so we can maintain the record of which subject is taught in which class in which school.
 model ClassRoom {
-  id    String @id @default(uuid())
-  name  String
+  id   String @id @default(uuid())
+  name String
 
-  school_id String
-  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
-  classSubjects   ClassSubject[]
-  teachers        ClassSubjectTeacher[]
-  enrollments     StudentSubjectEnrollment[]
-  marks           StudentMarks[]
-  attendance      Attendance[]
+  school_id      String
+  school         School                     @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  classSubjects  ClassSubject[]
+  teachers       ClassSubjectTeacher[]
+  enrollments    StudentSubjectEnrollment[]
+  marks          StudentMarks[]
+  attendance     Attendance[]
   studentClasses StudentClass[]
-  classSections ClassSection[]
+  classSections  ClassSection[]
 }
 
 // The name should be like V-A(for class V- A section) etc.
-model ClassSection{
-  id String @id @default(uuid())
-  name String
+model ClassSection {
+  id       String @id @default(uuid())
+  name     String
   class_id String
 
-  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  studentClasses StudentClass[]
-  classSubjects   ClassSubject[]
-  classSubjectTeachers ClassSubjectTeacher[]
+  classroom                 ClassRoom                  @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  studentClasses            StudentClass[]
+  // classSubjects   ClassSubject[]
+  classSubjectTeachers      ClassSubjectTeacher[]
   studentSubjectEnrollments StudentSubjectEnrollment[]
-  attendance Attendance[]
-  marks StudentMarks[]
+  attendance                Attendance[]
+  marks                     StudentMarks[]
 }
 
 // One student can study class V in one school, and same student can study class VI in another school, so we need to link student to class and school both. This is the reason we have created this table, which will link student to class and school both.
-model StudentClass{
-  id String @id @default(uuid())
+model StudentClass {
+  id         String @id @default(uuid())
   student_id String
-  class_id String
-  school_id String
+  class_id   String
+  school_id  String
   section_id String
-  year Int
+  year       Int
 
-  student User @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  student      User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  classroom    ClassRoom    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  school       School       @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
 model Subject {
-  id    String @id @default(uuid())
-  name  String
+  id   String @id @default(uuid())
+  name String
 
-  classSubjects   ClassSubject[]
-  teachers        ClassSubjectTeacher[]
-  enrollments     StudentSubjectEnrollment[]
-  marks           StudentMarks[]
-  attendance      Attendance[]
+  classSubjects ClassSubject[]
+  teachers      ClassSubjectTeacher[]
+  enrollments   StudentSubjectEnrollment[]
+  marks         StudentMarks[]
+  attendance    Attendance[]
 }
 
 model ClassSubject {
@@ -274,12 +265,11 @@ model ClassSubject {
   class_id   String
   subject_id String
   school_id  String
-  section_id String
 
   classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
   subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
-  classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  // classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
 // Which school has how many rooms, and what type of rooms, like lab, class room, library etc. This is physical room which is linked to school, and then we can link that room to class subject teacher for taking attendance and marks entry.
@@ -290,26 +280,26 @@ model SchoolRoom {
   capacity  Int
   type      String
 
-  school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  school               School                @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSubjectTeachers ClassSubjectTeacher[]
 }
 
 model ClassSubjectTeacher {
-  id          String @id @default(uuid())
-  subject_id  String
-  class_id    String
-  teacher_id  String
-  school_id   String
-  section_id String
-  period_slot String
-  schoolRoom_id String   // This is linked to SchoolRoom table, that define in which room the class will be held.
-  year        Int
+  id            String @id @default(uuid())
+  subject_id    String
+  class_id      String
+  teacher_id    String
+  school_id     String
+  section_id    String
+  period_slot   String
+  schoolRoom_id String // This is linked to SchoolRoom table, that define in which room the class will be held.
+  year          Int
 
-  subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
-  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  teacher   User      @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
-  school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
-  schoolRoom SchoolRoom @relation(fields: [schoolRoom_id], references: [id], onDelete: Cascade)
+  subject      Subject      @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  classroom    ClassRoom    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  teacher      User         @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+  school       School       @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  schoolRoom   SchoolRoom   @relation(fields: [schoolRoom_id], references: [id], onDelete: Cascade)
   classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
 }
 
@@ -320,20 +310,21 @@ model StudentSubjectEnrollment {
   student_id  String
   class_id    String
   school_id   String
-  section_id String
+  section_id  String
   subject_id  String
   period_slot String
   year        Int
 
-  student   User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  classroom ClassRoom @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  subject   Subject   @relation(fields: [subject_id], references: [id], onDelete: Cascade)
-  school    School    @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  student      User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  classroom    ClassRoom    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  subject      Subject      @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  school       School       @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
-    @@unique([student_id, subject_id, year])
+
+  @@unique([student_id, subject_id, year])
 }
 
-model StudentMarks {           // This is a recored
+model StudentMarks {
   id             String @id @default(uuid())
   student_id     String
   subject_id     String
@@ -346,14 +337,14 @@ model StudentMarks {           // This is a recored
   exam_type      String
   exam_component String
 
-  student   User      @relation(fields: [student_id], references: [id])
-  subject   Subject   @relation(fields: [subject_id], references: [id])
-  classroom ClassRoom @relation(fields: [class_id], references: [id])
-  school    School    @relation(fields: [school_id], references: [id])
+  student      User         @relation(fields: [student_id], references: [id])
+  subject      Subject      @relation(fields: [subject_id], references: [id])
+  classroom    ClassRoom    @relation(fields: [class_id], references: [id])
+  school       School       @relation(fields: [school_id], references: [id])
   classSection ClassSection @relation(fields: [section_id], references: [id])
 }
 
-model Attendance {             // This is a record
+model Attendance {
   id         String   @id @default(uuid())
   class_id   String
   student_id String
@@ -369,20 +360,20 @@ model Attendance {             // This is a record
   school    School    @relation(fields: [school_id], references: [id])
   subject   Subject   @relation(fields: [subject_id], references: [id])
 
-  student User @relation("StudentAttendance", fields: [student_id], references: [id])
-  teacher User @relation("TeacherAttendance", fields: [teacher_id], references: [id])
+  student      User         @relation("StudentAttendance", fields: [student_id], references: [id])
+  teacher      User         @relation("TeacherAttendance", fields: [teacher_id], references: [id])
   classSection ClassSection @relation(fields: [section_id], references: [id])
 }
 
 model PasswordReset {
-  id           String   @id @default(uuid())
-  user_id      String
-  otp_hash     String
-  reset_token  String
-  is_verified  Boolean
-  is_used      Boolean
-  expires_at   DateTime
-  created_at   DateTime @default(now())
+  id          String   @id @default(uuid())
+  user_id     String
+  otp_hash    String
+  reset_token String
+  is_verified Boolean
+  is_used     Boolean
+  expires_at  DateTime
+  created_at  DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
