@@ -9,6 +9,8 @@ import { requireAdminPrinciple } from '@/lib/requireAdminPrinciple';
 // We can add a new record if the user changes school.
 // Only admin and principle can add or view the user-school association.
 
+
+// Is it will be better if principle add the user-school association from his[principle] page? I think it will be better because principle can manage the user-school association of his school.
 export async function POST(req: Request, {params}: {params: {user_id: string}}){
    
     try{
