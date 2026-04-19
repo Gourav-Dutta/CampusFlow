@@ -4,6 +4,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { requireAdminPrinciple } from "@/lib/requireAdminPrinciple";
 
 // model StudentClass {
 //   id         String @id @default(uuid())
@@ -21,7 +22,7 @@ import { requireAdmin } from "@/lib/requireAdmin";
 
 export async function POST(req: Request){
     try{
-        const deny = await requireAdmin();
+        const deny = await requireAdminPrinciple();
         if(deny) return deny;
         const formData = await req.formData();
         const studentId = formData.get("studentId") as string;
@@ -76,7 +77,7 @@ export async function POST(req: Request){
 
 async function GET(req: Request){
     try{
-        const deny = await requireAdmin();
+        const deny = await requireAdminPrinciple();
         if(deny) return deny;
         const studentClasses = await prisma.studentClass.findMany();
         return NextResponse.json({ data: studentClasses });
@@ -106,4 +107,52 @@ async function DELETE(req: Request){
         console.error("Error occurred while deleting student class association:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     };
+}
+
+async function PUT(req: Request){
+    try{
+        const deny = await requireAdminPrinciple();
+        if(deny) return deny;
+        const formData = await req.formData();
+        const studentClassId = formData.get("studentClassId") as string;
+        const studentId = formData.get("studentId") as string;
+        const classId = formData.get("classId") as string;
+        const schoolId = formData.get("schoolId") as string;
+        const sectionId = formData.get("sectionId") as string;
+        const year = formData.get("year") as string;
+        const validateStudentClass = await prisma.studentClass.findUnique({
+            where: { id: studentClassId }
+        });
+        if(!validateStudentClass){
+            return NextResponse.json({ error: "Student class association not found" }, { status: 404 });
+        }
+        type updateValue = {
+            studentId?: string,
+            classId?: string,
+            schoolId?: string,
+            sectionId?: string,
+            year?: number
+
+        };
+        const updateData: updateValue ={};
+        if(studentId) updateData.studentId = studentId;
+        if(classId) updateData.classId = classId;
+        if(schoolId) updateData.schoolId = schoolId;
+        if(sectionId) updateData.sectionId = sectionId;
+        if(year) updateData.year = parseInt(year);
+
+        const updateStudentClass = await prisma.studentClass.update({
+            where:{ id: studentClassId},
+            data: {...updateData}
+        });
+
+        return NextResponse.json({
+            msg: "Student details updated successfully",
+            data: updateStudentClass
+        })
+
+}catch(error){
+    console.error(`An error occured: ${error}`);
+    return NextResponse.json({error: "Internal server error"}, {status: 500});
+}
 }
