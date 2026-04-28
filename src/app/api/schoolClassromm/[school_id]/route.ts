@@ -1,4 +1,5 @@
-// This to get, update, delete a classRomm of a particular school
+// This to get, update, delete a classRomm of a particular school.
+// This is actully CRUD on class depends on school.
 // Only for ADMIN & PRINCIPLE
 
 import prisma from "@/lib/prisma";

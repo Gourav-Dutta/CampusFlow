@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminPrinciple } from "@/lib/requireAdminPrinciple";
 
 // model ClassSection {
 //   id       String @id @default(uuid())
@@ -15,11 +16,13 @@ import { NextResponse } from "next/server";
 //   marks                     StudentMarks[]
 // }
 
-async function POST(
+export async function POST(
   req: Request,
   { params }: { params: { class_id: string } },
 ) {
   try {
+    const deny = await requireAdminPrinciple();
+    if (deny) return deny;
     const { class_id } = params;
     const formData = await req.formData();
     const sectionName = formData.get("sectionName") as string;
@@ -51,7 +54,7 @@ async function POST(
   }
 }
 
-async function GET(req: Request, { params }: { params: { class_id: string } }) {
+export async function GET(req: Request, { params }: { params: { class_id: string } }) {
   try {
     const { class_id } = params;
     const classSecctions = await prisma.classSection.findMany({
@@ -67,11 +70,13 @@ async function GET(req: Request, { params }: { params: { class_id: string } }) {
   }
 }
 
-async function DELETE(
+export async function DELETE(
   req: Request,
   { params }: { params: { class_id: string } },
 ) {
   try {
+    const deny = await requireAdminPrinciple();
+    if(deny) return deny;
     const { class_id } = params;
     const deleteClassSections = await prisma.classSection.deleteMany({
       where: { class_id: class_id },
