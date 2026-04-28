@@ -1,5 +1,5 @@
 // Principle add it from his page not from student page because principle can manage the student class association of his school.
-
+// Test pending
 
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -75,7 +75,7 @@ export async function POST(req: Request){
 
 
 
-async function GET(req: Request){
+export async function GET(req: Request){
     try{
         const deny = await requireAdminPrinciple();
         if(deny) return deny;
@@ -109,7 +109,7 @@ async function DELETE(req: Request){
     };
 }
 
-async function PUT(req: Request){
+export async function PUT(req: Request){
     try{
         const deny = await requireAdminPrinciple();
         if(deny) return deny;
