@@ -1,5 +1,5 @@
 // Principle add it from his page not from student page because principle can manage the student class association of his school.
-// Test pending
+
 
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -127,23 +127,23 @@ export async function PUT(req: Request){
             return NextResponse.json({ error: "Student class association not found" }, { status: 404 });
         }
         type updateValue = {
-            studentId?: string,
-            classId?: string,
-            schoolId?: string,
-            sectionId?: string,
+            student_id?: string,
+            class_id?: string,
+            school_id?: string,
+            section_id?: string,
             year?: number
 
         };
         const updateData: updateValue ={};
-        if(studentId) updateData.studentId = studentId;
-        if(classId) updateData.classId = classId;
-        if(schoolId) updateData.schoolId = schoolId;
-        if(sectionId) updateData.sectionId = sectionId;
+        if(studentId) updateData.student_id = studentId;
+        if(classId) updateData.class_id = classId;
+        if(schoolId) updateData.school_id = schoolId;
+        if(sectionId) updateData.section_id = sectionId;
         if(year) updateData.year = parseInt(year);
 
         const updateStudentClass = await prisma.studentClass.update({
             where:{ id: studentClassId},
-            data: {...updateData}
+            data:updateData
         });
 
         return NextResponse.json({
