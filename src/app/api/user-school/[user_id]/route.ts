@@ -13,6 +13,7 @@ import { headers } from "next/headers";
 
 
 // pending task: This params API does't need i am retriving user-id from headers, have to shift it.
+// A particular user school details current.
 export async function GET(
   req: Request,
   { params }: { params: { user_id: string } },

@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma";
+import { requireAdmin } from "@/lib/requireAdmin";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export async function GET( // Get user based on userID
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+
+// Get my profile
+export async function GET(req: Request) { // Get user based on userID
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -26,13 +37,20 @@ export async function GET( // Get user based on userID
   }
 }
 
-export async function PUT( // Update user based on userID
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+// Update my account
+export async function PUT(req: Request) { // Update user based on userID
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -46,7 +64,6 @@ export async function PUT( // Update user based on userID
       password?: string;
       email?: string;
       phone_no?: string;
-      year?: string;
     };
 
     const updateData: UpdateUser = {};
@@ -55,21 +72,21 @@ export async function PUT( // Update user based on userID
     const password = formData.get("password") as string;
     const email = formData.get("email") as string;
     const phone_no = formData.get("phone_no") as string;
-    const year = formData.get("year") as string;
+    // const year = formData.get("year") as string;
 
     if (typeof name === "string") updateData.name = name;
     if (typeof password === "string") updateData.password = password;
     if (typeof email === "string") updateData.email = email;
     if (typeof phone_no === "string") updateData.phone_no = phone_no;
-    if (typeof year === "string") updateData.year = year;
+    // if (typeof year === "string") updateData.year = year;
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: userId },
       data: updateData,
     });
 
     return NextResponse.json(
-      { msg: "User updated successfully", data: updatedUser },
+      { msg: "Your details updated successfully", data: updatedUser },
       { status: 200 },
     );
   } catch (err: any) {
@@ -80,12 +97,18 @@ export async function PUT( // Update user based on userID
   }
 }
 
-export async function DELETE( // Delete user based on userID
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+// Like- delete my account
+export async function DELETE(req: Request) { // Delete user based on userID
   try {
-    const userId = await params.id;
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     console.log(userId);
     const validateUser = await prisma.user.findUnique({
       where: { id: userId },
@@ -119,3 +142,25 @@ export async function DELETE( // Delete user based on userID
     );
   }
 }
+// export async function GET(req: Request) {
+//   try {
+//     const deny = await requireAdmin();
+//     if (deny) return deny;
+//     const allUser = await prisma.user.findMany();
+//     console.log("All user found");
+//     return NextResponse.json(
+//       {
+//         msg: "All user found",
+//         data: allUser,
+//       },
+//       { status: 200 },
+//     );
+//   } catch (err: any) {
+//     return NextResponse.json(
+//       {
+//         msg: `An error occured: ${err.message}`,
+//       },
+//       { status: 500 },
+//     );
+//   }
+// }

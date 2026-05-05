@@ -1,26 +1,23 @@
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import prisma from "../../../lib/prisma";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireAdminPrinciple } from "@/lib/requireAdminPrinciple";
 
-export async function GET(req: Request) {
-  try {
-    const deny = await requireAdmin();
-    if (deny) return deny;
-    const allUser = await prisma.user.findMany();
-    console.log("All user found");
-    return NextResponse.json(
-      {
-        msg: "All user found",
-        data: allUser,
-      },
-      { status: 200 },
-    );
-  } catch (err: any) {
-    return NextResponse.json(
-      {
-        msg: `An error occured: ${err.message}`,
-      },
-      { status: 500 },
-    );
-  }
+
+export async function GET(req: Request){
+    try{
+        const deny = await requireAdminPrinciple();
+        if(deny) return deny;
+
+        const users = await prisma.user.findMany();
+        return NextResponse.json({
+            msg: "users retrived successfully",
+            data: users
+        })
+    }catch(error){
+        console.log(error);
+        return NextResponse.json({
+            msg: "Error in users fetching",
+            error: `Error occured in users fetching ${error}`
+        });
+    }
 }
