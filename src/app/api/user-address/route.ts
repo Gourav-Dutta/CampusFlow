@@ -1,13 +1,22 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import {auth} from "@/lib/auth";
+import {headers} from "next/headers";
 
 // On the basis of user id
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
 ) {
   try {
-    const { id: userId } = await params;
+    // const { id: userId } = await params;
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.user.id;
     const formData = await req.formData();
 
     const city = formData.get("city") as string;
@@ -60,6 +69,9 @@ export async function POST(
           connect: { id: userId },
         },
       },
+      include: {
+        user: true
+      }
     });
 
     return NextResponse.json(
@@ -74,16 +86,27 @@ export async function POST(
     );
   }
 }
-// Put user-address id not user id:
+
+
+
+// Update user address: 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } },
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const formData = await req.formData();
-    console.log(params.id);
+    // console.log(params.id);
     const validateUser = await prisma.userAddress.findUnique({
-      where: { id: params.id },
+      where: { id: userId },
     });
 
     if (!validateUser)
@@ -130,7 +153,7 @@ export async function PUT(
     }
 
     const newAddress = await prisma.userAddress.update({
-      where: { id: params.id },
+      where: { id: userId },
       data: updateAddress,
     });
 
@@ -150,11 +173,20 @@ export async function PUT(
 // Get address based on user-id: /api/user-address/[id]
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
     const userAddress = await prisma.userAddress.findMany({
-      where: { user_id: params.id },
+      where: { user_id: userId },
       include: {
         user: true,
       },
@@ -173,14 +205,22 @@ export async function GET(
   }
 }
 
-// Delete address based on address-id: /api/user-address/[id]
+// // Delete address based on address-id: /api/user-address/[id]
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
 ) {
   try {
+     const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const deleteAddress = await prisma.userAddress.delete({
-      where: { id: params.id },
+      where: { id: userId },
     });
     return NextResponse.json({
       msg: "Address deleted successfully",
@@ -198,11 +238,19 @@ export async function DELETE(
 // Update is_primary of an address based on address-id:
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
 ) {
   try {
+     const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
     const validateAddress = await prisma.userAddress.findUnique({
-      where: { id: params.id },
+      where: { id: userId },
     });
     if (!validateAddress)
       return NextResponse.json(
@@ -239,7 +287,7 @@ export async function PATCH(
       });
     }
     const updateAddress = await prisma.userAddress.update({
-      where: { id: params.id },
+      where: { id:userId },
       data: { is_primary: is_primary_boolean },
       include: { user: true },
     });
