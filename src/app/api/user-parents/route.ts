@@ -26,7 +26,7 @@ export async function POST(
     const validateUser = await prisma.user.findUnique({
       where: { id: userId },
     });
-    console.log(validateUser);
+    console.log("Parent details: ", validateUser);
     if (!validateUser)
       return NextResponse.json(
         {
@@ -143,6 +143,14 @@ export async function PUT(
           msg: "User not found",
         },
         { status: 404 },
+      );
+
+    if(validateUser.role !== "Student")
+      return NextResponse.json(
+        {
+          msg: "Sorry, user is not a student!",
+        },
+        { status: 400 },
       );
 
     const formData = await req.formData();

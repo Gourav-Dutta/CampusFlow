@@ -52,7 +52,7 @@ export async function POST(
   }
 }
 
-export async function PUT( // Convert it to school_id
+export async function PUT( 
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
@@ -97,13 +97,13 @@ export async function PUT( // Convert it to school_id
   }
 }
 
+
+// This is for anyone not only for admin.
 export async function GET( // Based on specific school_id
   req: Request,
   { params }: { params: { school_id: string } },
 ) {
   try {
-    const deny = await requireAdmin();
-    if (deny) return deny;
     const findSchollAddress = await prisma.schoolAddress.findMany({
       where: { school_id: params.school_id },
       include: {
