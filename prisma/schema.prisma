@@ -43,6 +43,26 @@ enum SchoolType {
   Higher_Secondary
 }
 
+enum AttendanceStatus {
+  Present
+  Absent
+  Late
+  Excused
+}
+
+enum ExamType{
+  Midterm
+  Final
+  Quiz
+  Assignment
+}
+
+enum ExamComponent{
+  Written
+  Oral
+  Practical
+}
+
 model User {
   // Better Auth core fields
   id            String   @id
@@ -334,8 +354,8 @@ model StudentMarks {
   marks          Int
   year           Int
   grade          String
-  exam_type      String
-  exam_component String
+  exam_type      ExamType
+  exam_component ExamComponent
 
   student      User         @relation(fields: [student_id], references: [id])
   subject      Subject      @relation(fields: [subject_id], references: [id])
@@ -352,7 +372,7 @@ model Attendance {
   section_id String
   subject_id String
   teacher_id String
-  status     String
+  status     AttendanceStatus
   date       DateTime
   year       Int
 
