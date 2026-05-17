@@ -77,7 +77,7 @@ export async function SignInAction(formData: FormData) {
       headers: await headers(),
     });
     const role = user?.user?.role;
-    console.log(role);
+    console.log("Role is: ", role);
     // if (role === "Admin") redirect("/admin");
     // if (role === "Principal") redirect("/principal");
     // if (role === "Teacher") redirect("/teacher");
@@ -99,6 +99,51 @@ export async function SignInAction(formData: FormData) {
     };
   }
 }
+
+
+// export async function SignInAction(formData: FormData) {
+//   try {
+//     const email = formData.get("email") as string;
+//     const password = formData.get("password") as string;
+
+//     const user = await auth.api.signInEmail({
+//       body: { email, password },
+//       headers: await headers(),
+//     });
+
+//     const role = user?.user?.role;
+//     let schoolId = null;
+//     console.log("Role is: ", role);
+
+//     // Fetch schoolId if Principal
+//     if (role === UserRole.Principal) {
+//       const school = await prisma.school.findFirst({
+//         where: { principal_id: user.user.id },
+//         select: { id: true },
+//       });
+//       schoolId = school?.id ?? null;
+//     }
+
+//     return {
+//       status: "Success",
+//       data: user,
+//       role,
+//       schoolId, // null for non-principals
+//     };
+
+//     // return NextResponse.json({
+//     //   "msg": "User logged in successfully",
+//     //   data: user,
+//     //   role,
+//     //   schoolId: schoolId
+//     // })
+//   } catch (err: any) {
+//     return {
+//       status: "Fail",
+//       msg: err.message,
+//     };
+//   }
+// }
 
 export async function SignOutAction() {
   try {

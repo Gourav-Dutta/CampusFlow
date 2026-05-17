@@ -50,15 +50,100 @@ export default function LoginPage() {
     const role = resData?.user?.role;
     console.log("Role: ", role);
     console.log("Routing based on role...");
-    if (role === "Admin"){
-      console.log("Redirecting to admin...");
-      route.push("/admin");
-    } 
-    if (role === "Principal") route.push("/principal");
-    if (role === "Teacher") route.push("/teacher");
-    if (role === "Student") route.push("/student");
-    if (role === "Parent") route.push("/parent");
+    // if (role === "Admin"){
+    //   console.log("Redirecting to admin...");
+    //   route.push("/admin");
+    // } 
+    // if (role === "Principal") route.push("/principal");
+    // if (role === "Teacher") route.push("/teacher");
+    // if (role === "Student") route.push("/student");
+    // if (role === "Parent") route.push("/parent");
+
+     switch (role){
+      case "Admin": 
+      route.push("/admin/dashboard");
+      break;
+      case "Principal": 
+      const schoolRes = await fetch("/api/principle/school", {
+        credentials: "include",
+      });
+      const schoolData = await schoolRes.json();
+      console.log("school data: ", schoolData);
+       route.push(
+        schoolData?.id
+          ? `/school/${schoolData.school_id}/dashboard`
+          : "/no-school-assigned"
+      );
+      break;
+      case "teacher":
+        route.push("/teacher/dashboard");
+
+      break;
+      case "Student":
+        route.push("/student/dashboard");
+        break;
+      case "Parent" :
+        route.push("/parent/dashboard");
+        break;
+        default: 
+        route.push("/");
+     }
   };
+
+
+//   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+//   event.preventDefault();
+//   const form = event.currentTarget;
+
+//   const result = await fetch("/api/auth/sign-in/email", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({
+//       email: (form.email as HTMLInputElement).value,
+//       password: (form.password as HTMLInputElement).value,
+//     }),
+//     credentials: "include",
+//   });
+
+//   const resData = await result.json();
+
+//   if (!result.ok) {
+//     setState({ status: "Fail", msg: resData.message || "Login Failed" });
+//     return;
+//   }
+
+//   const role = resData?.user?.role;
+
+//   switch (role) {
+//     case "Admin":
+//       route.push("/admin");
+//       break;
+//     case "Principal": {
+//       // Fetch school separately after login (session cookie is now set)
+//       const schoolRes = await fetch("/api/principal/school", {
+//         credentials: "include", // sends the session cookie
+//       });
+//       const schoolData = await schoolRes.json();
+//       route.push(
+//         schoolData?.id
+//           ? `/school/${schoolData.id}/dashboard`
+//           : "/no-school-assigned"
+//       );
+//       break;
+//     }
+//     case "Teacher":
+//       route.push("/teacher/dashboard");
+//       break;
+//     case "Student":
+//       route.push("/student/dashboard");
+//       break;
+//     case "Parent":
+//       route.push("/parent/dashboard");
+//       break;
+//     default:
+//       route.push("/");
+//   }
+// };
 
   return (
    <div className="min-h-screen flex items-center justify-center bg-gray-100">

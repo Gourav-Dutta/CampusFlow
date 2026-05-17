@@ -13,7 +13,7 @@ export async function POST(
     if (deny) return deny;
     const formData = await req.formData();
     const schoolId = formData.get("schoolId") as string;
-    const studentId = formData.get("studentId") as string;
+    const userId = formData.get("userId") as string;
     // const role = formData.get("role") as userRole;
     const year = formData.get("year") as string;
     const is_current_raw = formData.get("is_current") as string;
@@ -21,7 +21,7 @@ export async function POST(
     if (is_current_boolean) {
       await prisma.userSchool.updateMany({
         where: {
-          user_id: studentId,
+          user_id: userId,
           is_current: true,
         },
         data: {
@@ -32,7 +32,7 @@ export async function POST(
 
     const schoolStudent = await prisma.userSchool.create({
       data: {
-        user_id: studentId,
+        user_id: userId,
         school_id: schoolId,
         year: year,
         is_current: is_current_boolean,
