@@ -50,17 +50,34 @@ enum AttendanceStatus {
   Excused
 }
 
-enum ExamType{
+enum ExamType {
   Midterm
   Final
   Quiz
   Assignment
 }
 
-enum ExamComponent{
+enum ExamComponent {
   Written
   Oral
   Practical
+}
+
+enum RoomType {
+  CLASSROOM
+  LAB
+  SEMINAR
+  LIBRARY
+  OFFICE
+  AUDITORIUM
+}
+
+enum RoomStatus {
+  ACTIVE
+  UNDER_MAINTENANCE
+  UNDER_RENOVATION
+  DAMAGED
+  CLOSED
 }
 
 model User {
@@ -144,7 +161,7 @@ model UserSchool {
   user_id    String
   school_id  String
   year       String
-  is_current Boolean 
+  is_current Boolean
 
   user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   school School @relation(fields: [school_id], references: [id], onDelete: Cascade)
@@ -294,11 +311,12 @@ model ClassSubject {
 
 // Which school has how many rooms, and what type of rooms, like lab, class room, library etc. This is physical room which is linked to school, and then we can link that room to class subject teacher for taking attendance and marks entry.
 model SchoolRoom {
-  id        String @id @default(uuid())
+  id        String     @id @default(uuid())
   school_id String
   room_no   String
   capacity  Int
-  type      String
+  type      RoomType  @default(CLASSROOM)
+  status    RoomStatus  @default(ACTIVE)
 
   school               School                @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSubjectTeachers ClassSubjectTeacher[]
@@ -345,7 +363,7 @@ model StudentSubjectEnrollment {
 }
 
 model StudentMarks {
-  id             String @id @default(uuid())
+  id             String        @id @default(uuid())
   student_id     String
   subject_id     String
   class_id       String
@@ -365,7 +383,7 @@ model StudentMarks {
 }
 
 model Attendance {
-  id         String   @id @default(uuid())
+  id         String           @id @default(uuid())
   class_id   String
   student_id String
   school_id  String
