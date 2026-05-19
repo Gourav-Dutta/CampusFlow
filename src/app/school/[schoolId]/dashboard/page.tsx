@@ -20,7 +20,7 @@ export default async function PrincipalDashboard({ params }: Props) {
   if (!session) redirect("/login");
   if (session.user.role !== "Principal") redirect("/unauthorized");
   console.log("Test 2");
-  // 2. Fetch school data using schoolId from URL
+  // Fetch school data using schoolId from URL
   const school = await prisma.school.findUnique({
     where: { id: schoolId },
     include: {
