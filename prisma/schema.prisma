@@ -278,12 +278,14 @@ model StudentClass {
   class_id   String
   school_id  String
   section_id String
+  is_current Boolean @default(true)
   year       Int
 
   student      User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
   classroom    ClassRoom    @relation(fields: [class_id], references: [id], onDelete: Cascade)
   school       School       @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  studentSubjectEnrollments StudentSubjectEnrollment[]
 }
 
 model Subject {
@@ -350,6 +352,7 @@ model StudentSubjectEnrollment {
   school_id   String
   section_id  String
   subject_id  String
+  stu_class_id String
   period_slot String
   year        Int
 
@@ -358,7 +361,7 @@ model StudentSubjectEnrollment {
   subject      Subject      @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   school       School       @relation(fields: [school_id], references: [id], onDelete: Cascade)
   classSection ClassSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
-
+  studentClass StudentClass @relation(fields: [stu_class_id], references: [id], onDelete: Cascade)
   @@unique([student_id, subject_id, year])
 }
 
