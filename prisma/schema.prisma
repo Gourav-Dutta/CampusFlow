@@ -80,6 +80,12 @@ enum RoomStatus {
   CLOSED
 }
 
+enum PeriodSlot{
+  Morning
+  Day
+  Evening
+}
+
 model User {
   // Better Auth core fields
   id            String   @id
@@ -353,7 +359,7 @@ model StudentSubjectEnrollment {
   section_id  String
   subject_id  String
   stu_class_id String
-  period_slot String
+  period_slot PeriodSlot @default(Morning)
   year        Int
 
   student      User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
@@ -369,9 +375,6 @@ model StudentMarks {
   id             String        @id @default(uuid())
   student_id     String
   subject_id     String
-  class_id       String
-  school_id      String
-  section_id     String
   marks          Int
   year           Int
   grade          String
@@ -380,9 +383,9 @@ model StudentMarks {
 
   student      User         @relation(fields: [student_id], references: [id])
   subject      Subject      @relation(fields: [subject_id], references: [id])
-  classroom    ClassRoom    @relation(fields: [class_id], references: [id])
-  school       School       @relation(fields: [school_id], references: [id])
-  classSection ClassSection @relation(fields: [section_id], references: [id])
+  // classroom    ClassRoom    @relation(fields: [class_id], references: [id])
+  // school       School       @relation(fields: [school_id], references: [id])
+  // classSection ClassSection @relation(fields: [section_id], references: [id])
 }
 
 model Attendance {
