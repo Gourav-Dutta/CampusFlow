@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 
-
+// Get principle current school
 export async function GET(req: Request){
     try{
         const deny = await requireAdminPrinciple();
@@ -24,7 +24,7 @@ export async function GET(req: Request){
 
         const school = await prisma.userSchool.findFirst({
             where: { user_id: userId, is_current: true },
-            // include: { school: true },
+            include: { school: true },
         });
 
         if (!school) {
