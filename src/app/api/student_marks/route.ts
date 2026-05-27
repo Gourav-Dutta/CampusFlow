@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { ExamComponent, ExamType } from "@/generated/prisma";
 
 
 // model StudentMarks {
@@ -23,7 +24,7 @@ import { headers } from "next/headers";
 
 
 
-// Not completd
+// Test Pending
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -38,9 +39,10 @@ export async function POST(req: Request) {
   const studentId = formData.get("studentId") as string;
   const subject_id = formData.get("subjectId") as string;
   const marks = parseInt(formData.get("marks") as string, 10);
-  const examType = formData.get("examType") as string;
-  const examComponent = formData.get("examComponent") as string;
-  const year = new Date().getFullYear();
+  const examType = formData.get("examType") as ExamType;
+  const examComponent = formData.get("examComponent") as ExamComponent;
+  const grade = formData.get("grade") as string;
+  const year = new Date().getFullYear() as number;
     // Fetch student details to get class_id, school_id, section_id
     const stuDetails = await prisma.studentClass.findMany({
       where: { student_id: studentId, is_current: true },
@@ -50,7 +52,7 @@ export async function POST(req: Request) {
     const school_id = stuDetails[0].school_id;
     const section_id = stuDetails[0].section_id;
 
-
+  // Using the class,school, section and subject we check wither the teacher is assigned to that class/subject/school/section or not.
   const isAuthorized = await prisma.classSubjectTeacher.findFirst({
     where: {
       teacher_id: userId,
@@ -68,6 +70,20 @@ export async function POST(req: Request) {
       { status: 403 }
     );
   }
-
+  
+  const stuMarks = await prisma.studentMarks.create({
+    data: {
+      student_id: studentId,
+      subject_id,
+      marks,
+      year,
+      grade: grade, 
+      exam_type: examType,
+      exam_component: examComponent,
+      class_id,
+      school_id,
+      section_id
+    }
+  })
  
 }
