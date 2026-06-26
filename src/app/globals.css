@@ -5,23 +5,89 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --purple: #534AB7;
+  --purple-light: #EEEDFE;
+  --purple-dark: #3C3489;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --purple-light: #26215C;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
 }
 
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulse-dot {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Animation utility classes ── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+
+  .animate-fade-up          { animation: fade-up 0.5s ease both; }
+  .animate-fade-in          { animation: fade-in 0.4s ease both; }
+  .animate-float            { animation: float 4s ease-in-out infinite; }
+  .animate-slide-in-left    { animation: slide-in-left 0.4s ease both; }
+  .animate-count-up         { animation: count-up 0.5s ease both; }
+
+  /* stagger delays for lists */
+  .delay-100  { animation-delay: 100ms; }
+  .delay-200  { animation-delay: 200ms; }
+  .delay-300  { animation-delay: 300ms; }
+  .delay-400  { animation-delay: 400ms; }
+  .delay-500  { animation-delay: 500ms; }
+  .delay-600  { animation-delay: 600ms; }
+  .delay-700  { animation-delay: 700ms; }
+  .delay-800  { animation-delay: 800ms; }
+  .delay-900  { animation-delay: 900ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+
+  /* pulse ring for live dots */
+  .pulse-ring {
+    position: relative;
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0;
+    animation: pulse-dot 1.8s ease-out infinite;
   }
 }

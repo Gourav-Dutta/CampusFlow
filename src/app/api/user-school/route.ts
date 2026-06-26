@@ -4,7 +4,8 @@ import { requireAdminPrinciple } from "@/lib/requireAdminPrinciple";
 
 
 
-// Admin/Principle can add student with a school association from their own portal. 
+// Admin/Principle can add student with a school association from their own portal.
+// For already existing student, they will provide their user-id to school and school will add them with their school in user school table. 
 export async function POST(
   req: Request,
 ) {
@@ -18,6 +19,20 @@ export async function POST(
     const year = formData.get("year") as string;
     const is_current_raw = formData.get("is_current") as string;
     const is_current_boolean = is_current_raw === "true" ? true : false; // I wil make this true by default in thr forntend.
+
+    const userDetails  = await prisma.user.findUnique({
+      where: { id: userId}
+    });
+    if(!userDetails) return NextResponse.json({
+      error: "User not found",
+      msg: "The provided userId does not exist in our records"
+    });
+    if(userDetails.role !== "Student" && userDetails.role !== "Parent"){
+      return NextResponse.json({
+        error: "Invalid user role",
+        msg: "Only students and parents can be associated with a school"
+      }, { status: 400 });
+    }
     if (is_current_boolean) {
       await prisma.userSchool.updateMany({
         where: {
@@ -39,7 +54,7 @@ export async function POST(
       },
     });
     return NextResponse.json({
-      msg: "Student school association created successfully",
+      msg: "User school association created successfully",
       data: schoolStudent,
     });
   } catch (error) {

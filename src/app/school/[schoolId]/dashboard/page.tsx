@@ -15,10 +15,10 @@ export default async function PrincipalDashboard({ params }: Props) {
 
   // Verify session
   const session = await auth.api.getSession({ headers: await headers() });
-  console.log("Session in PrincipalDashboard:", session);
+  console.log("Session in Admin:", session);
   console.log("Test 1");
-  if (!session) redirect("/login");
-  if (session.user.role !== "Principal") redirect("/unauthorized");
+  if (!session) redirect("/signIn");
+  if (session.user.role !== "Admin") redirect("/unauthorized");
   console.log("Test 2");
   // Fetch school data using schoolId from URL
   const school = await prisma.school.findUnique({

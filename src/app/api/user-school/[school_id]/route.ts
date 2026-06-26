@@ -12,11 +12,9 @@ import { headers } from "next/headers";
 
 
 
-// pending task: This params API does't need i am retriving user-id from headers, have to shift it.
-// A particular user school details current.
 export async function GET(
   req: Request,
-  { params }: { params: { user_id: string } },
+  { params }: { params: { school_id: string } },
 ) {
   try {
     // const deny = await requireAdminPrinciple();
@@ -29,11 +27,23 @@ export async function GET(
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = session.user.id;
-    const userCurrentSchool = await prisma.userSchool.findMany({
-      where: { user_id: userId, is_current: true },
-    });
+  const school_id = params.school_id;
+    const userCurrentSchool =
+  await prisma.userSchool.findMany({
+    where: {
+      school_id: school_id,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+  });
     return NextResponse.json({
       msg: "User schools retrieved successfully",
       data: userCurrentSchool,
