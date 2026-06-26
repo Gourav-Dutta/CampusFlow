@@ -17,7 +17,7 @@ export async function signUpAction(formData: FormData) {
     const phone_no = formData.get("phone_no") as string;
     const year = formData.get("year") as string;
     const role = formData.get("role") as UserRole;
-    const studentId = formData.get("studentId") as string;
+    const studentId = formData.get("studentId") as string; // Only for parents signUp form
     console.log("Code execuation start");
 
     const newUser = await auth.api.signUpEmail({
@@ -90,8 +90,8 @@ export async function SignInAction(formData: FormData) {
     // });
     return {
       status: "Success",
-      data: user
-    }
+      data: user,
+    };
   } catch (err: any) {
     return {
       status: "Fail",
@@ -99,7 +99,6 @@ export async function SignInAction(formData: FormData) {
     };
   }
 }
-
 
 // export async function SignInAction(formData: FormData) {
 //   try {

@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { NextResponse } from "next/server";
 import { SchoolType } from "@/generated/prisma";
+import { truncate } from "node:fs";
 
 export async function PUT(
   req: Request,
@@ -126,6 +127,7 @@ export async function GET(
     if (deny) return deny;
     const school = await prisma.school.findUnique({
       where: { id: params.school_id },
+      include: {principal: true}
     });
 
     if (!school)
@@ -139,6 +141,34 @@ export async function GET(
       data: school,
       status: 200,
     });
+  } catch (err: any) {
+    return NextResponse.json({
+      msg: `An error occured: ${err.message}`,
+      status: 400,
+    });
+  }
+}
+
+export async function PATCH(req: Request, {params} : {params: {school_id: string}}){
+  try{
+      const deny = await requireAdmin();
+      if(deny) return deny;
+
+
+      const formData = await req.formData();
+      const principal_id = formData.get("principleId") as string;
+      const school_id = params.school_id;
+
+      
+      const updatedSchoolPrinsiple = await prisma.school.update({
+        where: {id: school_id},
+        data: {principal_id: principal_id }
+      });
+
+      return NextResponse.json({
+        msg: "Svchool principle updated successfully",
+        data: updatedSchoolPrinsiple
+      });
   } catch (err: any) {
     return NextResponse.json({
       msg: `An error occured: ${err.message}`,

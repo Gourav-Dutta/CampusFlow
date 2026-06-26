@@ -5,6 +5,15 @@ import { nextCookies } from "better-auth/next-js";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import type { HookEndpointContext } from "@better-auth/core";
 import { headers } from "next/headers";
+import nodemailer from "nodemailer";
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.GMAIL_USER,
+//     pass: process.env.GMAIL_APP_PASSWORD,
+//   },
+// });
 
 const prisma = new PrismaClient();
 
@@ -15,6 +24,24 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    //     sendResetPassword: async ({ user, url }) => {
+    //     await transporter.sendMail({
+    //       from: `"Campus Flow" <${process.env.GMAIL_USER}>`,
+    //       to: user.email,
+    //       subject: "Reset your password",
+    //       html: `
+    //         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 24px;">
+    //           <h2>Password Reset Request</h2>
+    //           <p>Hi <strong>${user.name}</strong>,</p>
+    //           <p>Click below to reset your password. Link expires in <strong>1 hour</strong>.</p>
+    //           <a href="${url}" style="display:block; text-align:center; padding:12px; background:#4F46E5; color:white; border-radius:6px; text-decoration:none; margin:24px 0;">
+    //             Reset Password
+    //           </a>
+    //           <p style="color:#888; font-size:13px;">If you didn't request this, ignore this email.</p>
+    //         </div>
+    //       `,
+    //     });
+    //   },
   },
 
   user: {

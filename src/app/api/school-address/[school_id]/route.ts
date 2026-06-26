@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
+import {requireAdminPrinciple} from "@/lib/requireAdminPrinciple";
 
 // One school can have only one relation
 export async function POST(
@@ -10,17 +11,17 @@ export async function POST(
   { params }: { params: { school_id: string } },
 ) {
   try {
-    const deny = await requireAdmin();
+    const deny = await requireAdminPrinciple();
     if (deny) return deny;
     const formData = await req.formData();
     const validateSchool = await prisma.school.findUnique({
       where: { id: params.school_id },
     });
 
-    if (!validateSchool)
-      return NextResponse.json({
-        msg: "No school ",
-      });
+    // if (!validateSchool)
+    //   return NextResponse.json({
+    //     msg: "No school ",
+    //   });
     console.log(formData);
     const city = formData.get("city") as string;
     const state = formData.get("state") as string;
@@ -57,7 +58,7 @@ export async function PUT(
   { params }: { params: { school_id: string } },
 ) {
   try {
-    const deny = await requireAdmin();
+    const deny = await requireAdminPrinciple();
     if (deny) return deny;
     const formData = await req.formData();
     const validateSchoolAddress = await prisma.schoolAddress.findMany({
@@ -132,10 +133,10 @@ export async function DELETE( // Based  on school id
     const validateSchool = await prisma.schoolAddress.findMany({
       where: { school_id: params.school_id },
     });
-    if (!validateSchool)
-      return NextResponse.json({
-        msg: "No school address present with this id",
-      });
+    // if (!validateSchool)
+    //   return NextResponse.json({
+    //     msg: "No school address present with this id",
+    //   });
     const deny = await requireAdmin();
     if (deny) return deny;
     const deleteAddress = await prisma.schoolAddress.deleteMany({

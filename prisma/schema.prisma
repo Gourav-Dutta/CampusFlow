@@ -376,7 +376,7 @@ model StudentMarks {
   student_id     String
   subject_id     String
   class_id       String
-  school_id      String
+  school_id      String 
   section_id     String
   marks          Int
   year           Int
