@@ -10,7 +10,7 @@ export async function searchSchools(formData: FormData) {
     where: {
       address: {
         is: {
-          // 'mode: insensitive' makes "Kolkata" match "kolkata"
+          
           city: city ? { contains: city, mode: "insensitive" } : undefined,
           state: state ? { equals: state, mode: "insensitive" } : undefined,
         },

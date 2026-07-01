@@ -1,6 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [city, setCity] = useState("");
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const router = useRouter();
+  const handleSearch = async () => {
+    const res = await fetch(`${baseUrl}/api/city-school/${encodeURIComponent(city)}`);
+     if (!res.ok) {
+    router.push("/search-school?city=" + encodeURIComponent(city));
+    return;
+  }
+
+  const data = await res.json();
+
+  if (data.length > 0) {
+    router.push("/search-school?city=" + encodeURIComponent(city));
+  } else {
+    router.push("/search-school?city=" + encodeURIComponent(city));
+  }
+
+    console.log(data);
+
+  }
   return (
     <main className="min-h-screen bg-[#F6F7FB] font-sans text-slate-900">
       {/* ── Navbar ── */}
@@ -64,10 +89,12 @@ export default function Home() {
             </span>
             <input
               type="text"
-              placeholder="Search for a school..."
+              placeholder="Enter Your Preferred City..."
               className="flex-1 px-3 py-3 text-sm outline-none bg-transparent"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
-            <button className="m-1.5 px-4 py-1.5 bg-[#534AB7] text-white text-sm rounded-lg hover:opacity-90 transition">
+            <button className="m-1.5 px-4 py-1.5 bg-[#534AB7] text-white text-sm rounded-lg hover:opacity-90 transition" onClick={()=> handleSearch()}>
               Search
             </button>
           </div>
