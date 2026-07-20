@@ -47,9 +47,6 @@ export default function Home() {
           <span className="text-lg font-medium">Campus Flow</span>
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-4 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-            Browse schools
-          </button>
           <Link href="/signIn">
             <button className="px-4 py-1.5 text-sm bg-[#534AB7] text-white rounded-lg hover:opacity-90 transition">
               Sign in
